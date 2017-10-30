@@ -2,8 +2,8 @@ project('Multimedia TP3', 'cpp', default_options: ['cpp_std=c++1z'], license: 'M
 
 opencv_dep = dependency('opencv')
 
-main = executable('main.bin', ['src/main.cpp', 'src/sobel.cpp'], dependencies: opencv_dep)
-main_lib = shared_library('main', ['src/sobel.cpp'], dependencies: opencv_dep)
+main = executable('main.bin', ['src/main.cpp', 'src/sobel.cpp', 'src/threshold.cpp'], dependencies: opencv_dep)
+main_lib = shared_library('main', ['src/sobel.cpp', 'src/threshold.cpp'], dependencies: opencv_dep)
 
 sobel = executable('sobel.bin', ['tests/sobel.cpp'], link_with: main_lib, dependencies: opencv_dep)
 threshold = executable('threshold.bin', ['tests/threshold.cpp'], link_with: main_lib, dependencies: opencv_dep)
