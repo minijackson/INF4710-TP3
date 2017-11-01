@@ -1,0 +1,4 @@
+[submodule "subprojects/hayai/hayai"]
+	path = subprojects/hayai/hayai
+	url = https://github.com/nickbruun/hayai
+	branch = master
