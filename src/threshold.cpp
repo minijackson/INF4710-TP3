@@ -14,6 +14,8 @@ namespace {
 				return (minmax.first + minmax.second) / 2;
 			}
 			case luma:
+				return 0.299 * red + 0.587 * green + 0.114 * blue;
+			case luma_rounded:
 				return std::round(0.299 * red + 0.587 * green + 0.114 * blue);
 			default:
 				throw std::runtime_error("Unknown lightness component");

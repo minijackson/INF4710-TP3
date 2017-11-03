@@ -24,4 +24,11 @@ int main() {
 	assert_mat_equal(threshold(test1, 2, LightnessComponent::luma), expected3);
 	std::cout << "Testing Threshold 3 (value)..." << std::endl;
 	assert_mat_equal(threshold(test1, 2, LightnessComponent::value), expected3);
+
+	//cv::Mat cameraman = cv::imread("../data/cameraman.tif", cv::IMREAD_COLOR);
+	//std::cout << "Testing cameraman..." << std::endl;
+	//cv::imshow("Originale", cameraman);
+	//cv::imshow("Cameraman", threshold(cameraman, 127, luma_rounded));
+
+	//cv::waitKey(0);
 }

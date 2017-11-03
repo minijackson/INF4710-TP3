@@ -7,6 +7,7 @@ enum LightnessComponent {
 	value,
 	lightness,
 	luma,
+	luma_rounded
 };
 
 cv::Mat_<uint8_t> threshold(cv::Mat const& input,
