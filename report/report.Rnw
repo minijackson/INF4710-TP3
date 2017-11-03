@@ -1,0 +1,130 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage[hidelinks]{hyperref}
+\hypersetup{pdfencoding=auto}
+\usepackage{amsmath}
+%\usepackage{nath}
+\usepackage{fullpage}
+\raggedbottom
+\usepackage{microtype}
+%\usepackage{biblatex}
+\usepackage{booktabs}
+\usepackage{graphicx}
+
+%\usepackage{dirtree}
+
+%\addbibresource{references.bib}
+
+\usepackage{fontspec}
+\setmonofont[Scale=0.8]{Fira Code}
+\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
+\usepackage{minted}
+\usepackage[colorinlistoftodos]{todonotes}
+
+% Light Theme
+\usemintedstyle{tomorrow}
+\definecolor{bg}{rgb}{0.95,0.95,0.95}
+
+% Dark Dracula Theme
+%\usemintedstyle{dracula}
+%\definecolor{bg}{rgb}{0.207843, 0.219608, 0.27451}
+
+\setminted{linenos,bgcolor=bg,tabsize=4,breaklines}
+
+\renewcommand\listingscaption{Extrait de code}
+\renewcommand\listoflistingscaption{Liste des extraits de code}
+
+\author{Rémi \textsc{Nicole} \and Stéphane \textsc{Tzvetkov}}
+\title{}
+
+\begin{document}
+
+\maketitle
+
+%~\clearpage
+
+<<echo=F>>=
+library(rjson)
+library(purrr)
+library(dplyr)
+library(ggplot2)
+@
+
+<<>>=
+random_fixtures <- c("BlockRandomImageFixture",
+                     "EDTV480RandomImageFixture",
+                     "EDTV576RandomImageFixture",
+                     "HDTV720RandomImageFixture",
+                     "HDTV1080RandomImageFixture")
+random_images <- c("3×3", "480p", "576p", "720p", "1080p")
+fixed_fixtures <- c("AirplaneFixedImageFixture",
+                    "BaboonFixedImageFixture",
+                    "CameramanFixedImageFixture",
+                    "LenaFixedImageFixture",
+                    "LogoNoiseFixedImageFixture",
+                    "LogoFixedImageFixture",
+                    "PeppersFixedImageFixture")
+fixed_images <- c("Airplane", "Baboon", "Cameraman", "Lena", "Logo Noise",
+                  "Logo", "Peppers")
+
+fixtures <- c(random_fixtures, fixed_fixtures)
+images <- c(random_images, fixed_images)
+
+threshold <- fromJSON(file="../build-release/threshold.json")
+threshold.images <- threshold$benchmarks %>%
+  modify("fixture") %>%
+  unlist %>%
+  factor(levels=fixtures)
+levels(threshold.images) <- images
+
+threshold.component <- threshold$benchmarks %>%
+  modify("name") %>%
+  unlist %>%
+  factor(levels=c("intensity", "value", "lightness", "luma", "luma_rounded"))
+levels(threshold.component) <- c("Intensité", "Valeur", "Luminosité", "Luma", "Luma (arrondi)")
+
+threshold.means <- threshold$benchmarks %>% modify("mean") %>% unlist
+threshold.stddev <- threshold$benchmarks %>% modify("std_dev") %>% unlist
+
+threshold_data <- data.frame(Image=threshold.images,
+                             Component=threshold.component,
+                             Mean=threshold.means,
+                             StdDev=threshold.stddev)
+threshold_data.random <- filter(threshold_data, Image %in% random_images)
+threshold_data.fixed <- filter(threshold_data, Image %in% fixed_images)
+@
+
+<<fig.cap="Performance du seuillage en fonction du composant de luminosité", fig.pos="H">>=
+ggplot(threshold_data.random,
+       aes(x=Image, group=Component, y=Mean, color=Component)) +
+  labs(y="Moyenne du temps d'exécution", color="Composant de luminosité") +
+  theme(legend.position=c(.2, .8)) +
+  geom_point() +
+  geom_line() +
+  geom_errorbar(aes(ymin=Mean - StdDev, ymax=Mean + StdDev), width=.2)
+@
+
+<<fig.cap="Performance du seuillage sur images réelles", fig.pos="H">>=
+ggplot(threshold_data.fixed, aes(x=Component, y=Mean, fill=Component)) +
+  labs(x="Composant de luminosité",
+       y="Moyenne du temps d'exécution",
+       fill="Composant de luminosité") +
+  theme(axis.text.x=element_blank(), axis.ticks.x=element_blank(),
+        legend.position=c(.66, .2)) +
+  geom_bar(stat="identity") +
+  geom_errorbar(aes(ymin=Mean - StdDev, ymax=Mean + StdDev), width=.3) +
+  facet_wrap(~ Image)
+@
+
+\tableofcontents
+
+\listoflistings%
+\listoffigures
+\listoftables
+
+%\printbibliography%
+
+\end{document}
