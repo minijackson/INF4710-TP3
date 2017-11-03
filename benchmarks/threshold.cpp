@@ -13,8 +13,21 @@
 	THRESHOLD_BASE_BENCHMARK(fixture, intensity)                                                   \
 	THRESHOLD_BASE_BENCHMARK(fixture, value)                                                       \
 	THRESHOLD_BASE_BENCHMARK(fixture, lightness)                                                   \
-	THRESHOLD_BASE_BENCHMARK(fixture, luma)
+	THRESHOLD_BASE_BENCHMARK(fixture, luma)                                                        \
+	THRESHOLD_BASE_BENCHMARK(fixture, luma_rounded)
 
-THRESHOLD_ALL_COMPONENTS_BENCHMARKS(SmallRandomImageFixture)
-THRESHOLD_ALL_COMPONENTS_BENCHMARKS(MediumRandomImageFixture)
-THRESHOLD_ALL_COMPONENTS_BENCHMARKS(BigRandomImageFixture)
+// Random images
+THRESHOLD_ALL_COMPONENTS_BENCHMARKS(BlockRandomImageFixture);
+THRESHOLD_ALL_COMPONENTS_BENCHMARKS(EDTV480RandomImageFixture);
+THRESHOLD_ALL_COMPONENTS_BENCHMARKS(EDTV576RandomImageFixture);
+THRESHOLD_ALL_COMPONENTS_BENCHMARKS(HDTV720RandomImageFixture);
+THRESHOLD_ALL_COMPONENTS_BENCHMARKS(HDTV1080RandomImageFixture);
+
+// Given images
+THRESHOLD_ALL_COMPONENTS_BENCHMARKS(AirplaneFixedImageFixture);
+THRESHOLD_ALL_COMPONENTS_BENCHMARKS(BaboonFixedImageFixture);
+THRESHOLD_ALL_COMPONENTS_BENCHMARKS(CameramanFixedImageFixture);
+THRESHOLD_ALL_COMPONENTS_BENCHMARKS(LenaFixedImageFixture);
+THRESHOLD_ALL_COMPONENTS_BENCHMARKS(LogoNoiseFixedImageFixture);
+THRESHOLD_ALL_COMPONENTS_BENCHMARKS(LogoFixedImageFixture);
+THRESHOLD_ALL_COMPONENTS_BENCHMARKS(PeppersFixedImageFixture);
