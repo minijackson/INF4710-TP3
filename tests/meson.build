@@ -1,0 +1,38 @@
+sobel = executable(
+	'sobel_test.bin',
+	['sobel.cpp'],
+	link_with: main_lib,
+	dependencies: opencv_dep
+)
+threshold = executable(
+	'threshold_test.bin',
+	['threshold.cpp'],
+	link_with: main_lib,
+	dependencies: opencv_dep
+)
+dilation = executable(
+	'dilation_test.bin',
+	['dilation.cpp'],
+	link_with: main_lib,
+	dependencies: opencv_dep
+)
+edge_ratio = executable(
+	'edge_ratio_test.bin',
+	['edge_ratio.cpp'],
+	link_with: main_lib,
+	dependencies: opencv_dep
+)
+transition_detection = executable(
+	'transition_detection_test.bin',
+	['transition_detection.cpp'],
+	link_with: main_lib,
+	dependencies: opencv_dep
+)
+
+test('Sobel', sobel)
+test('Threshold', threshold)
+test('Dilation', dilation)
+test('Edge Ration', edge_ratio)
+test('Transition Detection', transition_detection)
+
+# vim: ft=cmake
