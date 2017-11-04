@@ -10,13 +10,13 @@
 \usepackage{fullpage}
 \raggedbottom
 \usepackage{microtype}
-%\usepackage{biblatex}
+\usepackage{biblatex}
 \usepackage{booktabs}
 \usepackage{graphicx}
 
 %\usepackage{dirtree}
 
-%\addbibresource{references.bib}
+\addbibresource{report.bib}
 
 \usepackage{fontspec}
 \setmonofont[Scale=0.8]{Fira Code}
@@ -51,6 +51,7 @@ library(rjson)
 library(purrr)
 library(dplyr)
 library(ggplot2)
+library(knitr)
 @
 
 <<>>=
@@ -70,6 +71,15 @@ fixed_fixtures <- c("AirplaneFixedImageFixture",
 fixed_images <- c("Airplane", "Baboon", "Cameraman", "Lena", "Logo Noise",
                   "Logo", "Peppers")
 
+threshold_components <- c("intensity", "value", "lightness", "luma",
+                          "luma_rounded")
+threshold_par_components <- paste(threshold_components, "_gnupar", sep="")
+threshold_benchs <- c(threshold_components, threshold_par_components)
+
+threshold_component_base_names <- c("Intensité", "Valeur", "Luminosité",
+                                    "Luma tronqué", "Luma arrondi")
+threshold_component_names <- rep(threshold_component_base_names, 2)
+
 fixtures <- c(random_fixtures, fixed_fixtures)
 images <- c(random_images, fixed_images)
 
@@ -77,45 +87,57 @@ threshold <- fromJSON(file="../build-release/threshold.json")
 threshold.images <- threshold$benchmarks %>%
   modify("fixture") %>%
   unlist %>%
-  factor(levels=fixtures)
-levels(threshold.images) <- images
+  factor(levels=fixtures, labels=images)
 
-threshold.component <- threshold$benchmarks %>%
+threshold.components <- threshold$benchmarks %>%
   modify("name") %>%
   unlist %>%
-  factor(levels=c("intensity", "value", "lightness", "luma", "luma_rounded"))
-levels(threshold.component) <- c("Intensité", "Valeur", "Luminosité", "Luma", "Luma (arrondi)")
+  factor(levels=threshold_benchs)
+levels(threshold.components) <- threshold_component_names
 
 threshold.means <- threshold$benchmarks %>% modify("mean") %>% unlist
 threshold.stddev <- threshold$benchmarks %>% modify("std_dev") %>% unlist
+threshold.is_parallel <- threshold$benchmarks %>%
+  modify("name") %>%
+  unlist %>%
+  endsWith("_gnupar") %>%
+  factor(levels=c(FALSE, TRUE), labels=c("Non", "Oui"))
 
 threshold_data <- data.frame(Image=threshold.images,
-                             Component=threshold.component,
+                             Component=threshold.components,
                              Mean=threshold.means,
-                             StdDev=threshold.stddev)
+                             StdDev=threshold.stddev,
+                             Parallel=threshold.is_parallel)
 threshold_data.random <- filter(threshold_data, Image %in% random_images)
 threshold_data.fixed <- filter(threshold_data, Image %in% fixed_images)
 @
 
 <<fig.cap="Performance du seuillage en fonction du composant de luminosité", fig.pos="H">>=
 ggplot(threshold_data.random,
-       aes(x=Image, group=Component, y=Mean, color=Component)) +
-  labs(y="Moyenne du temps d'exécution", color="Composant de luminosité") +
-  theme(legend.position=c(.2, .8)) +
+       aes(x=Image, y=Mean,
+           group=interaction(Component, Parallel),
+           color=Component,
+           linetype=Parallel)) +
+  labs(y="Moyenne du temps d'exécution",
+       color="Composant de luminosité",
+       linetype="Parallélisme") +
+  theme(legend.position=c(.2, .77)) +
   geom_point() +
-  geom_line() +
-  geom_errorbar(aes(ymin=Mean - StdDev, ymax=Mean + StdDev), width=.2)
+  geom_line()
 @
 
 <<fig.cap="Performance du seuillage sur images réelles", fig.pos="H">>=
-ggplot(threshold_data.fixed, aes(x=Component, y=Mean, fill=Component)) +
+ggplot(threshold_data.fixed, aes(x=Component,
+                                 y=Mean,
+                                 fill=Parallel)) +
   labs(x="Composant de luminosité",
        y="Moyenne du temps d'exécution",
-       fill="Composant de luminosité") +
-  theme(axis.text.x=element_blank(), axis.ticks.x=element_blank(),
-        legend.position=c(.66, .2)) +
+       fill="Parallélisme") +
+  theme(legend.position="top") +
   geom_bar(stat="identity") +
-  geom_errorbar(aes(ymin=Mean - StdDev, ymax=Mean + StdDev), width=.3) +
+  coord_flip() +
+  guides(fill=guide_legend(reverse=TRUE)) +
+#  geom_errorbar(aes(ymin=Mean - StdDev, ymax=Mean + StdDev), width=.3) +
   facet_wrap(~ Image)
 @
 
@@ -125,6 +147,12 @@ ggplot(threshold_data.fixed, aes(x=Component, y=Mean, fill=Component)) +
 \listoffigures
 \listoftables
 
-%\printbibliography%
+<<echo=FALSE>>=
+write_bib(sub("^.*/", "", grep("^/", searchpaths(), value=TRUE)),
+          file="report.bib")
+@
+
+\nocite{*}
+\printbibliography%
 
 \end{document}

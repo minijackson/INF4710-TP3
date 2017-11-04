@@ -25,6 +25,15 @@ int main() {
 	std::cout << "Testing Threshold 3 (value)..." << std::endl;
 	assert_mat_equal(threshold(test1, 2, LightnessComponent::value), expected3);
 
+	std::cout << "Testing Parallel Threshold 3 (intensity)..." << std::endl;
+	assert_mat_equal(threshold_gnupar(test1, 2, LightnessComponent::intensity), expected3);
+	std::cout << "Testing Parallel Threshold 3 (lightness)..." << std::endl;
+	assert_mat_equal(threshold_gnupar(test1, 2, LightnessComponent::lightness), expected3);
+	std::cout << "Testing Parallel Threshold 3 (luma)..." << std::endl;
+	assert_mat_equal(threshold_gnupar(test1, 2, LightnessComponent::luma), expected3);
+	std::cout << "Testing Parallel Threshold 3 (value)..." << std::endl;
+	assert_mat_equal(threshold_gnupar(test1, 2, LightnessComponent::value), expected3);
+
 	//cv::Mat cameraman = cv::imread("../data/cameraman.tif", cv::IMREAD_COLOR);
 	//std::cout << "Testing cameraman..." << std::endl;
 	//cv::imshow("Originale", cameraman);
