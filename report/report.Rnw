@@ -16,7 +16,7 @@
 
 %\usepackage{dirtree}
 
-\addbibresource{report.bib}
+\addbibresource{R.bib}
 
 \usepackage{fontspec}
 \setmonofont[Scale=0.8]{Fira Code}
@@ -149,7 +149,7 @@ ggplot(threshold_data.fixed, aes(x=Component,
 
 <<echo=FALSE>>=
 write_bib(sub("^.*/", "", grep("^/", searchpaths(), value=TRUE)),
-          file="report.bib")
+          file="R.bib")
 @
 
 \nocite{*}

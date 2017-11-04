@@ -1,6 +1,9 @@
 /report.tex
 /report.pdf
+# Automatic figures
 /figure
+# Automatic bibliography
+/R.bib
 
 # Created by https://www.gitignore.io/api/latex
 
