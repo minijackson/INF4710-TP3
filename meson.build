@@ -5,20 +5,22 @@ openmp_dep = declare_dependency(
 	compile_args: '-fopenmp',
 	link_args: '-fopenmp'
 )
+opencl_dep = declare_dependency(link_args: '-lOpenCL')
+
+sources = ['src/sobel.cpp',
+           'src/threshold.cpp',
+		   'src/opencl.cpp']
 
 main = executable(
 	'main.bin',
-	['src/main.cpp',
-	 'src/sobel.cpp',
-	 'src/threshold.cpp'],
-	dependencies: [opencv_dep, openmp_dep]
+	sources + ['src/main.cpp'],
+	dependencies: [opencv_dep, openmp_dep, opencl_dep]
 )
 
 main_lib = library(
 	'main',
-	['src/sobel.cpp',
-	 'src/threshold.cpp'],
-	dependencies: [opencv_dep, openmp_dep]
+	sources,
+	dependencies: [opencv_dep, openmp_dep, opencl_dep]
 )
 
 subdir('./tests')
