@@ -1,7 +1,1 @@
-#include <iostream>
-
-#include <cassert>
-
-int main() {
-	assert(1 == 1);
-}
+#include "gtest/gtest.h"

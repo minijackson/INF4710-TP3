@@ -1,6 +1,7 @@
 #pragma once
 
 #include <opencv2/opencv.hpp>
+#include <gtest/gtest.h>
 
 #include <algorithm>
 #include <iostream>
@@ -13,9 +14,10 @@ bool equal(cv::Mat_<SubElement> const& lhs, cv::Mat_<SubElement> const& rhs) {
 }
 
 template<typename SubElement>
-void assert_mat_equal(cv::Mat_<SubElement> const& lhs, cv::Mat_<SubElement> const& rhs) {
+bool assert_mat_equal(cv::Mat_<SubElement> const& lhs, cv::Mat_<SubElement> const& rhs) {
 	if(!equal(lhs, rhs)) {
 		std::cout << "LHS: " << lhs << "\nRHS: " << rhs << std::endl;
-		assert(equal(lhs, rhs));
+		return false;
 	}
+	return true;
 }

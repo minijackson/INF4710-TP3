@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <parallel/algorithm>
 
+#include <opencv2/core/ocl.hpp>
+
 namespace {
 	uint8_t getComponent(LightnessComponent component, uint8_t red, uint8_t green, uint8_t blue) {
 		switch(component) {
@@ -144,6 +146,30 @@ cv::Mat_<uint8_t> threshold_cl(cv::Mat_<cv::Vec4b> const& input, uint8_t limit) 
 	                       /* row_pitch = */ 0,
 	                       /* slice_pitch = */ 0,
 	                       output.data);
+
+	return output;
+}
+
+cv::Mat_<uint8_t> threshold_cv(cv::Mat_<cv::Vec3b> const& input, uint8_t limit) {
+	cv::Mat_<uint8_t> output;
+	output.create(input.rows, input.cols);
+
+	cv::cvtColor(input, output, CV_BGR2GRAY);
+	cv::threshold(output, output, limit, 255, 0);
+
+	return output;
+}
+
+cv::Mat_<uint8_t> threshold_cvcl(cv::Mat_<cv::Vec3b> const& input, uint8_t limit) {
+	cv::ocl::setUseOpenCL(true);
+
+	cv::Mat_<uint8_t> output;
+	output.create(input.rows, input.cols);
+
+	cv::cvtColor(input, output, CV_BGR2GRAY);
+	cv::threshold(output, output, limit, 255, 0);
+
+	cv::ocl::setUseOpenCL(false);
 
 	return output;
 }
