@@ -10,6 +10,7 @@
 
 namespace cl_singletons {
 
+	extern cl::CommandQueue queue;
 	extern cl::Context context;
 	extern std::vector<cl::Platform> platforms;
 	extern std::vector<cl::Device> devices;

@@ -6,6 +6,7 @@
 
 namespace cl_singletons {
 
+	cl::CommandQueue queue;
 	cl::Context context;
 	std::vector<cl::Platform> platforms;
 	std::vector<cl::Device> devices;
@@ -22,17 +23,24 @@ namespace cl_singletons {
 			throw std::runtime_error("No OpenCL compatible platform found on this system");
 		}
 
-		std::cout << "Found " << platforms.size() << " OpenCL compatible platforms" << std::endl;
+		std::cout << "Found " << platforms.size() << " OpenCL compatible platforms\n"
+			"Using: " << platforms[0].getInfo<CL_PLATFORM_NAME>() << std::endl;
 
 		platforms[0].getDevices(CL_DEVICE_TYPE_ALL, &devices);
 		if(devices.size() == 0) {
 			throw std::runtime_error("No OpenCL compatible devices found on this system");
 		}
 
-		std::cout << "Found " << devices.size() << " OpenCL compatible devices" << std::endl;
+		std::cout << "Found " << devices.size()
+		          << " OpenCL compatible devices\n"
+		             "Using: "
+		          << devices[0].getInfo<CL_DEVICE_NAME>() << std::endl;
 
 		context = cl::Context(devices);
 		std::cout << "OpenCL context created" << std::endl;
+
+		queue = cl::CommandQueue(context, devices[0]);
+		std::cout << "OpenCL command queue created" << std::endl;
 	}
 
 	cl::Program program_from_file(char const* filename) {
@@ -52,7 +60,7 @@ namespace cl_singletons {
 		error = program.build(devices);
 		if(error != 0) {
 			std::cerr << "Failed to build program:\n";
-			for(auto const& device: devices) {
+			for(auto const& device : devices) {
 				std::cerr << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device) << std::endl;
 			}
 			std::exit(error);

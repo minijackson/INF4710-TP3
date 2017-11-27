@@ -8,11 +8,11 @@
 #define CREATE_RANDOM_IMAGE_FIXTURE(ClassName, width, height)                                      \
 	class ClassName : public ::hayai::Fixture {                                                    \
 	public:                                                                                        \
-		static constexpr std::pair<size_t, size_t> image_size = {width, height};                   \
-		static constexpr size_t data_size = image_size.first * image_size.second * 3;              \
+		static constexpr size_t data_size = width * height;                                        \
                                                                                                    \
-		cv::Mat image;                                                                             \
-		uint8_t image_data[data_size];                                                             \
+		cv::Mat_<cv::Vec3b> image;                                                                 \
+		cv::Mat_<cv::Vec4b> image4;                                                                \
+		cv::Vec3b image_data[data_size];                                                           \
                                                                                                    \
 		virtual void SetUp() {                                                                     \
 			std::random_device r;                                                                  \
@@ -21,10 +21,13 @@
 			std::uniform_int_distribution<uint8_t> distribution;                                   \
                                                                                                    \
 			for(size_t i = 0; i < data_size; ++i) {                                                \
-				image_data[i] = distribution(rand_engine);                                         \
+				image_data[i][0] = distribution(rand_engine);                                      \
+				image_data[i][1] = distribution(rand_engine);                                      \
+				image_data[i][2] = distribution(rand_engine);                                      \
 			}                                                                                      \
                                                                                                    \
-			image = cv::Mat(image_size.first, image_size.second, CV_8UC3, image_data);             \
+			image = cv::Mat_<cv::Vec3b>(width, height, image_data);                                \
+			cv::cvtColor(image, image4, CV_BGR2RGBA, 4);                                           \
 		}                                                                                          \
 	};
 
@@ -38,9 +41,11 @@ CREATE_RANDOM_IMAGE_FIXTURE(HDTV1080RandomImageFixture, 1920, 1080);
 	class ClassName : public ::hayai::Fixture {                                                    \
 	public:                                                                                        \
 		cv::Mat image;                                                                             \
+		cv::Mat image4;                                                                            \
                                                                                                    \
 		virtual void SetUp() {                                                                     \
 			image = cv::imread("../data/" #image_name, cv::IMREAD_COLOR);                          \
+			cv::cvtColor(image, image4, CV_BGR2RGBA, 4);                                           \
 		}                                                                                          \
 	};
 

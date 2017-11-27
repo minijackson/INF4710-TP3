@@ -1,11 +1,12 @@
 #include "threshold.hpp"
 
 #include "opencl.hpp"
+#include "cl_mat.hpp"
+
+#include <opencv2/core/ocl.hpp>
 
 #include <algorithm>
 #include <parallel/algorithm>
-
-#include <opencv2/core/ocl.hpp>
 
 namespace {
 	uint8_t getComponent(LightnessComponent component, uint8_t red, uint8_t green, uint8_t blue) {
@@ -68,7 +69,7 @@ cv::Mat_<uint8_t> threshold_gnupar(cv::Mat_<cv::Vec3b> const& input,
 	return output;
 }
 
-cv::Mat_<uint8_t> threshold_cl(cv::Mat_<cv::Vec4b> const& input, uint8_t limit) {
+CLMat<uint8_t> threshold_cl(cv::Mat_<cv::Vec4b> const& input, uint8_t limit) {
 	static bool done_setup = false;
 	static cl::Kernel kernel;
 	if(!done_setup) {
@@ -87,11 +88,9 @@ cv::Mat_<uint8_t> threshold_cl(cv::Mat_<cv::Vec4b> const& input, uint8_t limit) 
 		done_setup = true;
 	}
 
-	cl::CommandQueue queue(cl_singletons::context, cl_singletons::devices[0]);
-
 	// Create buffers that represents variables in the device's side
 	cl::Image2D input_buffer(cl_singletons::context,
-	                         CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+	                         CL_MEM_READ_ONLY,
 	                         cl::ImageFormat(CL_RGBA, CL_UNSIGNED_INT8),
 	                         input.rows,
 	                         input.cols,
@@ -116,18 +115,18 @@ cv::Mat_<uint8_t> threshold_cl(cv::Mat_<cv::Vec4b> const& input, uint8_t limit) 
 	region.push_back(1);
 
 	// Send the image to the device
-	queue.enqueueWriteImage(input_buffer,
-	                        /* blocking = */ CL_TRUE,
-	                        origin,
-	                        region,
-	                        /* row_pitch = */ 0,
-	                        /* slice_pitch = */ 0,
-	                        input.data);
+	cl_singletons::queue.enqueueWriteImage(input_buffer,
+	                                       /* blocking = */ CL_FALSE,
+	                                       origin,
+	                                       region,
+	                                       /* row_pitch = */ 0,
+	                                       /* slice_pitch = */ 0,
+	                                       input.data);
 
 	// Create a functor (object that can be called) that will "call" the OpenCL function
 	cl::KernelFunctor threshold_cl_functor(
 	        kernel,
-	        queue,
+	        cl_singletons::queue,
 	        /* global_work_offset = */ cl::NullRange,
 	        /* global_work_size = */ cl::NDRange(input.rows, input.cols),
 	        /* local_work_size = */ cl::NullRange);
@@ -139,15 +138,29 @@ cv::Mat_<uint8_t> threshold_cl(cv::Mat_<cv::Vec4b> const& input, uint8_t limit) 
 	output.create(input.rows, input.cols);
 
 	// Get the result back
-	queue.enqueueReadImage(output_buffer,
-	                       /* blocking = */ CL_TRUE,
-	                       origin,
-	                       region,
-	                       /* row_pitch = */ 0,
-	                       /* slice_pitch = */ 0,
-	                       output.data);
+	// cl_singletons::queue.enqueueReadImage(output_buffer,
+	//                                      /* blocking = */ CL_TRUE,
+	//                                      origin,
+	//                                      region,
+	//                                      /* row_pitch = */ 0,
+	//                                      /* slice_pitch = */ 0,
+	//                                      output.data);
 
-	return output;
+
+	//void* mapped_memory = cl_singletons::queue.enqueueMapImage(output_buffer,
+	//                                                           /* blocking = */ CL_TRUE,
+	//                                                           CL_MAP_READ,
+	//                                                           origin,
+	//                                                           region,
+	//                                                           /* row_pitch = */ 0,
+	//                                                           /* slice_pitch = */ 0);
+
+	//memcpy(output.data, mapped_memory, sizeof(uint8_t) * input.rows * input.cols);
+	//cl_singletons::queue.enqueueUnmapMemObject(output_buffer, mapped_memory);
+
+	//return output;
+
+	return CLMat<uint8_t>(input.rows, input.cols, output_buffer);
 }
 
 cv::Mat_<uint8_t> threshold_cv(cv::Mat_<cv::Vec3b> const& input, uint8_t limit) {
