@@ -20,6 +20,7 @@ TEST(Threshold, MonoThreadedWithComponents) {
 	EXPECT_TRUE(assert_mat_equal(threshold(test1, 2, LightnessComponent::intensity), expected3));
 	EXPECT_TRUE(assert_mat_equal(threshold(test1, 2, LightnessComponent::lightness), expected3));
 	EXPECT_TRUE(assert_mat_equal(threshold(test1, 2, LightnessComponent::luma), expected3));
+	EXPECT_TRUE(assert_mat_equal(threshold(test1, 2, LightnessComponent::luma_rounded), expected3));
 	EXPECT_TRUE(assert_mat_equal(threshold(test1, 2, LightnessComponent::value), expected3));
 }
 
@@ -29,6 +30,8 @@ TEST(Threshold, GnuParallel) {
 	EXPECT_TRUE(
 	        assert_mat_equal(threshold_gnupar(test1, 2, LightnessComponent::lightness), expected3));
 	EXPECT_TRUE(assert_mat_equal(threshold_gnupar(test1, 2, LightnessComponent::luma), expected3));
+	EXPECT_TRUE(assert_mat_equal(threshold_gnupar(test1, 2, LightnessComponent::luma_rounded),
+	                             expected3));
 	EXPECT_TRUE(assert_mat_equal(threshold_gnupar(test1, 2, LightnessComponent::value), expected3));
 }
 
@@ -75,8 +78,7 @@ TEST(Threshold, DISABLED_AllOpenCL) {
 	for(std::string const& path : images) {
 		const cv::Mat_<cv::Vec3b> input = cv::imread(path, cv::IMREAD_COLOR);
 		if(input.empty()) {
-			std::cerr << "Could not load image at '" << path << "'; exiting..."
-			          << std::endl;
+			std::cerr << "Could not load image at '" << path << "'; exiting..." << std::endl;
 			std::exit(-1);
 		}
 

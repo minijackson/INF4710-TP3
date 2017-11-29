@@ -1,7 +1,7 @@
 #pragma once
 
-#include <opencv2/opencv.hpp>
 #include <gtest/gtest.h>
+#include <opencv2/opencv.hpp>
 
 #include <algorithm>
 #include <iostream>
