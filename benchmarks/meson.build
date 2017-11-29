@@ -5,6 +5,7 @@ hayai = subproject('hayai').get_variable('hayai_dep')
 sobel_bench = executable(
 	'sobel_bench.bin',
 	['sobel.cpp'],
+	cpp_pch: ['pch/pch.hpp'],
 	link_with: main_lib,
 	dependencies: [opencv_dep, hayai]
 )
@@ -12,6 +13,7 @@ sobel_bench = executable(
 threshold_components_bench = executable(
 	'threshold_components_bench.bin',
 	['threshold_components.cpp'],
+	cpp_pch: ['pch/pch.hpp'],
 	link_with: main_lib,
 	dependencies: [opencv_dep, hayai]
 )
@@ -19,6 +21,7 @@ threshold_components_bench = executable(
 threshold_implementations_bench = executable(
 	'threshold_implementations_bench.bin',
 	['threshold_implementations.cpp'],
+	cpp_pch: ['pch/pch.hpp'],
 	link_with: main_lib,
 	dependencies: [opencv_dep, opencl_dep, hayai]
 )
@@ -26,6 +29,7 @@ threshold_implementations_bench = executable(
 dilation_bench = executable(
 	'dilation_bench.bin',
 	['dilation.cpp'],
+	cpp_pch: ['pch/pch.hpp'],
 	link_with: main_lib,
 	dependencies: [opencv_dep, hayai]
 )

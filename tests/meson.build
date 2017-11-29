@@ -9,12 +9,14 @@ sobel = executable(
 threshold = executable(
 	'threshold_test.bin',
 	['threshold.cpp'],
+	cpp_pch: ['pch/pch.hpp'],
 	link_with: main_lib,
 	dependencies: [opencv_dep, gtest_dep, opencl_dep]
 )
 dilation = executable(
 	'dilation_test.bin',
 	['dilation.cpp'],
+	cpp_pch: ['pch/pch.hpp'],
 	link_with: main_lib,
 	dependencies: [opencv_dep, gtest_dep]
 )
