@@ -190,11 +190,13 @@ ggplot(threshold_data, aes(x=Implementation, y=Mean)) +
 
 <<>>=
 dilation_imp_names <- c("mono_threaded",
-                                     "openmp",
-                                     "opencv")
+                        "openmp",
+                        "opencl",
+                        "opencv")
 dilation_imp_display_names <- c("Non parallélisé",
-                                             "Parallélisé",
-                                             "Référence (OpenCV)")
+                                "Parallélisé",
+                                "Carte Graphique",
+                                "Référence (OpenCV)")
 
 dilation <- fromJSON(file="../build-release/dilation.json")
 dilation.images <-
@@ -220,7 +222,7 @@ dilation_data <-
 @
 
 
-<<fig.cap="Comparaison entre les implémentations du seuillage", fig.pos="H">>=
+<<fig.cap="Comparaison entre les implémentations de la dilatation", fig.pos="H">>=
 ggplot(dilation_data, aes(x=Implementation, y=Mean)) +
   labs(x="Implémentation", y="Moyenne du temps d'exécution") +
   geom_bar(stat="identity") +
