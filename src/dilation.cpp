@@ -20,10 +20,13 @@ cv::Mat_<uint8_t> dilate(cv::Mat_<uint8_t> const& input, const size_t radius) {
 
 					if(input(x, y) != 0) {
 						output(i, j) = 255;
-						break;
+						goto outtahere;
 					}
 				}
 			}
+outtahere:
+			// Noop
+			(void)0;
 		}
 	}
 
@@ -47,12 +50,14 @@ cv::Mat_<uint8_t> dilate_omp(cv::Mat_<uint8_t> const& input, const size_t radius
 
 					if(input(x, y) != 0) {
 						output(i, j) = 255;
-						break;
+						goto outtahere;
 					}
 
 				}
 			}
-
+outtahere:
+			// Noop
+			(void)0;
 		}
 	}
 
