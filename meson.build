@@ -9,6 +9,7 @@ opencl_dep = declare_dependency(link_args: '-lOpenCL')
 
 sources = ['src/sobel.cpp',
            'src/threshold.cpp',
+           'src/dilation.cpp',
 		   'src/opencl.cpp']
 
 main = executable(
@@ -17,7 +18,7 @@ main = executable(
 	dependencies: [opencv_dep, openmp_dep, opencl_dep]
 )
 
-main_lib = library(
+main_lib = static_library(
 	'main',
 	sources,
 	dependencies: [opencv_dep, openmp_dep, opencl_dep]
