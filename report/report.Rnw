@@ -83,31 +83,36 @@ threshold_component_names <- rep(threshold_component_base_names, 2)
 fixtures <- c(random_fixtures, fixed_fixtures)
 images <- c(random_images, fixed_images)
 
-threshold <- fromJSON(file="../build-release/threshold.json")
-threshold.images <- threshold$benchmarks %>%
+threshold_components <-
+  fromJSON(file="../build-release/threshold_components.json")
+threshold_components.images <- threshold_components$benchmarks %>%
   modify("fixture") %>%
   unlist %>%
   factor(levels=fixtures, labels=images)
 
-threshold.components <- threshold$benchmarks %>%
+threshold_components.components <- threshold_components$benchmarks %>%
   modify("name") %>%
   unlist %>%
   factor(levels=threshold_benchs)
-levels(threshold.components) <- threshold_component_names
+levels(threshold_components.components) <- threshold_component_names
 
-threshold.means <- threshold$benchmarks %>% modify("mean") %>% unlist
-threshold.stddev <- threshold$benchmarks %>% modify("std_dev") %>% unlist
-threshold.is_parallel <- threshold$benchmarks %>%
+threshold_components.means <- threshold_components$benchmarks %>%
+  modify("mean") %>%
+  unlist
+threshold_components.stddev <- threshold_components$benchmarks %>%
+  modify("std_dev") %>%
+  unlist
+threshold_components.is_parallel <- threshold_components$benchmarks %>%
   modify("name") %>%
   unlist %>%
   endsWith("_gnupar") %>%
   factor(levels=c(FALSE, TRUE), labels=c("Non", "Oui"))
 
-threshold_data <- data.frame(Image=threshold.images,
-                             Component=threshold.components,
-                             Mean=threshold.means,
-                             StdDev=threshold.stddev,
-                             Parallel=threshold.is_parallel)
+threshold_data <- data.frame(Image=threshold_components.images,
+                             Component=threshold_components.components,
+                             Mean=threshold_components.means,
+                             StdDev=threshold_components.stddev,
+                             Parallel=threshold_components.is_parallel)
 threshold_data.random <- filter(threshold_data, Image %in% random_images)
 threshold_data.fixed <- filter(threshold_data, Image %in% fixed_images)
 @
@@ -138,6 +143,88 @@ ggplot(threshold_data.fixed, aes(x=Component,
   coord_flip() +
   guides(fill=guide_legend(reverse=TRUE)) +
 #  geom_errorbar(aes(ymin=Mean - StdDev, ymax=Mean + StdDev), width=.3) +
+  facet_wrap(~ Image)
+@
+
+<<>>=
+threshold_implementations_names <- c("mono_threaded",
+                                     "gnu_parallel",
+                                     "opencl",
+                                     "opencv")
+threshold_implementations_display_names <- c("Non parallélisé",
+                                             "Parallélisé",
+                                             "Carte graphique",
+                                             "Référence (OpenCV)")
+
+threshold_implementations <-
+  fromJSON(file="../build-release/threshold_implementations.json")
+threshold_implementations.images <-
+  threshold_implementations$benchmarks %>%
+  modify("fixture") %>%
+  unlist %>%
+  factor(levels=fixtures, labels=images)
+threshold_implementations.means <-
+  threshold_implementations$benchmarks %>%
+  modify("mean") %>%
+  unlist
+threshold_implementations.implementations <-
+  threshold_implementations$benchmarks %>%
+  modify("name") %>%
+  unlist %>%
+  factor(levels=threshold_implementations_names,
+         labels=threshold_implementations_display_names)
+
+threshold_data <-
+  data.frame(Image=threshold_implementations.images,
+             Implementation=threshold_implementations.implementations,
+             Mean=threshold_implementations.means)
+@
+
+<<fig.cap="Comparaison entre les implémentations du seuillage", fig.pos="H">>=
+ggplot(threshold_data, aes(x=Implementation, y=Mean)) +
+  labs(x="Implémentation", y="Moyenne du temps d'exécution") +
+  geom_bar(stat="identity") +
+  coord_flip() +
+  facet_wrap(~ Image)
+@
+
+<<>>=
+dilation_imp_names <- c("mono_threaded",
+                                     "openmp",
+                                     "opencv")
+dilation_imp_display_names <- c("Non parallélisé",
+                                             "Parallélisé",
+                                             "Référence (OpenCV)")
+
+dilation <- fromJSON(file="../build-release/dilation.json")
+dilation.images <-
+  dilation$benchmarks %>%
+  modify("fixture") %>%
+  unlist %>%
+  factor(levels=paste("Threshed", fixtures, sep=""), labels=images)
+dilation.means <-
+  dilation$benchmarks %>%
+  modify("mean") %>%
+  unlist
+dilation.implementations <-
+  dilation$benchmarks %>%
+  modify("name") %>%
+  unlist %>%
+  factor(levels=dilation_imp_names,
+         labels=dilation_imp_display_names)
+
+dilation_data <-
+  data.frame(Image=dilation.images,
+             Implementation=dilation.implementations,
+             Mean=dilation.means)
+@
+
+
+<<fig.cap="Comparaison entre les implémentations du seuillage", fig.pos="H">>=
+ggplot(dilation_data, aes(x=Implementation, y=Mean)) +
+  labs(x="Implémentation", y="Moyenne du temps d'exécution") +
+  geom_bar(stat="identity") +
+  coord_flip() +
   facet_wrap(~ Image)
 @
 
