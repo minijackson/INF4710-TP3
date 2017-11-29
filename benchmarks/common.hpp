@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../src/opencl.hpp"
+
 #include <hayai.hpp>
 #include <opencv2/opencv.hpp>
 
@@ -15,6 +17,8 @@
 		cv::Vec3b image_data[data_size];                                                           \
                                                                                                    \
 		virtual void SetUp() {                                                                     \
+			cl_singletons::setup();                                                                \
+                                                                                                   \
 			std::random_device r;                                                                  \
 			std::seed_seq seed{r(), r(), r(), r(), r(), r()};                                      \
 			std::mt19937 rand_engine(seed);                                                        \
@@ -44,6 +48,8 @@ CREATE_RANDOM_IMAGE_FIXTURE(HDTV1080RandomImageFixture, 1920, 1080);
 		cv::Mat image4;                                                                            \
                                                                                                    \
 		virtual void SetUp() {                                                                     \
+			cl_singletons::setup();                                                                \
+                                                                                                   \
 			image = cv::imread("../data/" #image_name, cv::IMREAD_COLOR);                          \
 			cv::cvtColor(image, image4, CV_BGR2RGBA, 4);                                           \
 		}                                                                                          \
