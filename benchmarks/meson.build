@@ -20,7 +20,7 @@ threshold_implementations_bench = executable(
 	'threshold_implementations_bench.bin',
 	['threshold_implementations.cpp'],
 	link_with: main_lib,
-	dependencies: [opencv_dep, hayai]
+	dependencies: [opencv_dep, opencl_dep, hayai]
 )
 
 dilation_bench = executable(
