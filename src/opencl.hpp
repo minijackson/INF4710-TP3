@@ -10,12 +10,15 @@
 
 namespace cl_singletons {
 
+	extern cl::Kernel threshold_kernel;
+	extern cl::Kernel dilation_kernel;
+
 	extern cl::CommandQueue queue;
 	extern cl::Context context;
 	extern std::vector<cl::Platform> platforms;
 	extern std::vector<cl::Device> devices;
 
 	void setup();
-	cl::Program program_from_file(char const* filename);
+	cl::Kernel kernel_from_file(char const* filename, char const* name);
 
 }

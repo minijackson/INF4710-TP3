@@ -6,6 +6,9 @@
 
 namespace cl_singletons {
 
+	cl::Kernel threshold_kernel;
+	cl::Kernel dilation_kernel;
+
 	cl::CommandQueue queue;
 	cl::Context context;
 	std::vector<cl::Platform> platforms;
@@ -41,9 +44,12 @@ namespace cl_singletons {
 
 		queue = cl::CommandQueue(context, devices[0]);
 		std::cout << "OpenCL command queue created" << std::endl;
+
+		threshold_kernel = kernel_from_file("../src/opencl/threshold.cl", "threshold");
+		dilation_kernel = kernel_from_file("../src/opencl/dilation.cl", "dilate");
 	}
 
-	cl::Program program_from_file(char const* filename) {
+	cl::Kernel kernel_from_file(char const* filename, char const* name) {
 		std::ifstream source_file(filename);
 		std::string source_file_content{std::istreambuf_iterator<char>(source_file),
 		                                std::istreambuf_iterator<char>()};
@@ -59,13 +65,21 @@ namespace cl_singletons {
 
 		error = program.build(devices);
 		if(error != 0) {
-			std::cerr << "Failed to build program:\n";
+			std::cerr << "Failed to build program for kernel \"" << name << "\":\n";
 			for(auto const& device : devices) {
 				std::cerr << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device) << std::endl;
 			}
 			std::exit(error);
 		}
 
-		return program;
+		cl::Kernel kernel(program, name, &error);
+		if(error != 0) {
+			std::cerr << "Failed to create the \"" << name << "\" kernel" << std::endl;
+			std::exit(error);
+		}
+
+		std::cout << "Created Kernel: " << kernel.getInfo<CL_KERNEL_FUNCTION_NAME>() << std::endl;
+
+		return kernel;
 	}
 }

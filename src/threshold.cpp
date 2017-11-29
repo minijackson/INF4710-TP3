@@ -70,24 +70,6 @@ cv::Mat_<uint8_t> threshold_gnupar(cv::Mat_<cv::Vec3b> const& input,
 }
 
 CLMat<uint8_t> threshold_cl(cv::Mat_<cv::Vec4b> const& input, uint8_t limit) {
-	static bool done_setup = false;
-	static cl::Kernel kernel;
-	if(!done_setup) {
-		cl_singletons::setup();
-
-		cl::Program program = cl_singletons::program_from_file("../src/opencl/threshold.cl");
-		cl_int error;
-
-		kernel = cl::Kernel(program, "threshold", &error);
-		if(error != 0) {
-			perror("Failed to create the threshold kernel");
-			std::exit(error);
-		}
-		std::cout << "Created Kernel: " << kernel.getInfo<CL_KERNEL_FUNCTION_NAME>() << std::endl;
-
-		done_setup = true;
-	}
-
 	// Create buffers that represents variables in the device's side
 	cl::Image2D input_buffer(cl_singletons::context,
 	                         CL_MEM_READ_ONLY,
@@ -125,7 +107,7 @@ CLMat<uint8_t> threshold_cl(cv::Mat_<cv::Vec4b> const& input, uint8_t limit) {
 
 	// Create a functor (object that can be called) that will "call" the OpenCL function
 	cl::KernelFunctor threshold_cl_functor(
-	        kernel,
+	        cl_singletons::threshold_kernel,
 	        cl_singletons::queue,
 	        /* global_work_offset = */ cl::NullRange,
 	        /* global_work_size = */ cl::NDRange(input.rows, input.cols),
