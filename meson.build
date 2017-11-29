@@ -18,7 +18,7 @@ main = executable(
 	dependencies: [opencv_dep, openmp_dep, opencl_dep]
 )
 
-main_lib = static_library(
+main_lib = library(
 	'main',
 	sources,
 	dependencies: [opencv_dep, openmp_dep, opencl_dep]
