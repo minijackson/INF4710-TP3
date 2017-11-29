@@ -42,6 +42,11 @@ CREATE_THRESHED_IMAGE_FIXTURE(PeppersFixedImageFixture);
 		dilate_omp(threshed_image, 10);                                                            \
 	}
 
+#define DILATION_OPENCL_BENCH(fixture)                                                             \
+	BENCHMARK_F(fixture, opencl, 10, 50) {                                                         \
+		dilate_cl(threshed_image, 10);                                                             \
+	}
+
 #define DILATION_OPENCV_BENCH(fixture)                                                             \
 	BENCHMARK_F(fixture, opencv, 10, 50) {                                                         \
 		dilate_cv(threshed_image, 10);                                                             \
@@ -50,6 +55,7 @@ CREATE_THRESHED_IMAGE_FIXTURE(PeppersFixedImageFixture);
 #define DILATION_ALL_IMPLEMENTATIONS_BENCHMARKS(fixture)                                           \
 	DILATION_BASE_BENCH(Threshed##fixture)                                                         \
 	DILATION_OPENMP_BENCH(Threshed##fixture)                                                       \
+	DILATION_OPENCL_BENCH(Threshed##fixture)                                                       \
 	DILATION_OPENCV_BENCH(Threshed##fixture)
 
 /*

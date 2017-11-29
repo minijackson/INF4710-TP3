@@ -1,5 +1,7 @@
 #include "dilation.hpp"
 
+#include "opencl.hpp"
+
 #include <algorithm>
 #include <iostream>
 
@@ -62,6 +64,59 @@ outtahere:
 	}
 
 	return output;
+}
+
+CLMat<uint8_t> dilate_cl(cv::Mat_<uint8_t> const& input, const size_t radius) {
+	// Create buffers that represents variables in the device's side
+	cl::Image2D input_buffer(cl_singletons::context,
+			CL_MEM_READ_ONLY,
+			cl::ImageFormat(CL_INTENSITY, CL_UNSIGNED_INT8),
+			input.rows,
+			input.cols,
+			/* image_row_pitch = */ 0,
+			input.data);
+
+	cl::Image2D output_buffer(cl_singletons::context,
+			CL_MEM_WRITE_ONLY,
+			cl::ImageFormat(CL_INTENSITY, CL_UNSIGNED_INT8),
+			input.rows,
+			input.cols,
+			/* image_row_pitch = */ 0);
+
+	cl::size_t<3> origin;
+	origin.push_back(0);
+	origin.push_back(0);
+	origin.push_back(0);
+
+	cl::size_t<3> region;
+	region.push_back(input.rows);
+	region.push_back(input.cols);
+	region.push_back(1);
+
+	// Send the image to the device
+	cl_singletons::queue.enqueueWriteImage(input_buffer,
+			/* blocking = */ CL_FALSE,
+			origin,
+			region,
+			/* row_pitch = */ 0,
+			/* slice_pitch = */ 0,
+			input.data);
+
+	// Create a functor (object that can be called) that will "call" the OpenCL function
+	cl::KernelFunctor dilate_cl_functor(
+			cl_singletons::dilation_kernel,
+			cl_singletons::queue,
+			/* global_work_offset = */ cl::NullRange,
+			/* global_work_size = */ cl::NDRange(input.rows, input.cols),
+			/* local_work_size = */ cl::NullRange);
+
+	// Call it
+	dilate_cl_functor(input_buffer, static_cast<int>(radius), output_buffer);
+
+	cv::Mat_<uint8_t> output;
+	output.create(input.rows, input.cols);
+
+	return CLMat<uint8_t>(input.rows, input.cols, output_buffer);
 }
 
 cv::Mat_<uint8_t> dilate_cv(cv::Mat_<uint8_t> const& input, const size_t radius) {

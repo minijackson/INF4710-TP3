@@ -18,7 +18,7 @@ dilation = executable(
 	['dilation.cpp'],
 	cpp_pch: ['pch/pch.hpp'],
 	link_with: main_lib,
-	dependencies: [opencv_dep, gtest_dep]
+	dependencies: [opencv_dep, gtest_dep, opencl_dep]
 )
 edge_ratio = executable(
 	'edge_ratio_test.bin',

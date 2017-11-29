@@ -31,7 +31,7 @@ dilation_bench = executable(
 	['dilation.cpp'],
 	cpp_pch: ['pch/pch.hpp'],
 	link_with: main_lib,
-	dependencies: [opencv_dep, hayai]
+	dependencies: [opencv_dep, opencl_dep, hayai]
 )
 
 # Register benchmarks
