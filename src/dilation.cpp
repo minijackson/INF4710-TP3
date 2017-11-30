@@ -2,13 +2,12 @@
 
 #include "opencl.hpp"
 
-#include <algorithm>
-#include <iostream>
-
 #include <omp.h>
 
+#include <algorithm>
+
 cv::Mat_<uint8_t> dilate(cv::Mat_<uint8_t> const& input, const size_t radius) {
-	cv::Mat_<uint8_t> output(input.rows, input.cols, static_cast<uint8_t>(0));
+	cv::Mat_<uint8_t> output = input.clone();
 
 	int iradius = std::min({static_cast<int>(radius), input.cols, input.rows});
 
@@ -36,7 +35,7 @@ outtahere:
 }
 
 cv::Mat_<uint8_t> dilate_omp(cv::Mat_<uint8_t> const& input, const size_t radius) {
-	cv::Mat_<uint8_t> output(input.rows, input.cols, static_cast<uint8_t>(0));
+	cv::Mat_<uint8_t> output = input.clone();
 
 	int iradius = std::min({static_cast<int>(radius), input.cols, input.rows});
 
@@ -110,8 +109,10 @@ CLMat<uint8_t> dilate_cl(cv::Mat_<uint8_t> const& input, const size_t radius) {
 			/* global_work_size = */ cl::NDRange(input.rows, input.cols),
 			/* local_work_size = */ cl::NullRange);
 
+	int iradius = std::min({static_cast<int>(radius), input.cols, input.rows});
+
 	// Call it
-	dilate_cl_functor(input_buffer, static_cast<int>(radius), output_buffer);
+	dilate_cl_functor(input_buffer, iradius, output_buffer);
 
 	cv::Mat_<uint8_t> output;
 	output.create(input.rows, input.cols);

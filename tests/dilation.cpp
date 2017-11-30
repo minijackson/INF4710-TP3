@@ -1,9 +1,111 @@
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
+
+#include "common.hpp"
 
 #include "../src/dilation.hpp"
 #include "../src/threshold.hpp"
 
-TEST(Threshold, DISABLED_AllImplementations) {
+cv::Mat_<uint8_t> test1 = (cv::Mat_<uint8_t>(5, 5) <<
+		0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0),
+                  test2 = (cv::Mat_<uint8_t>(5, 5) <<
+						  0, 0, 0,   0, 0,
+						  0, 0, 0,   0, 0,
+						  0, 0, 255, 0, 0,
+						  0, 0, 0,   0, 0,
+						  0, 0, 0,   0, 0),
+                  test3 = (cv::Mat_<uint8_t>(5, 5) <<
+						  0, 0,   0, 0, 0,
+						  0, 255, 0, 0, 0,
+						  0, 0,   0, 0, 0,
+						  0, 0,   0, 0, 0,
+						  0, 0,   0, 0, 0),
+
+                  test4 = (cv::Mat_<uint8_t>(5, 5) <<
+						  0, 0,   0,   0,   0,
+						  0, 255, 255, 255, 0,
+						  0, 255, 255, 255, 0,
+						  0, 255, 255, 255, 0,
+						  0, 0,   0,   0,   0),
+                  test5 = (cv::Mat_<uint8_t>(5, 5) <<
+						  0, 0,   0,   0, 0,
+						  0, 255, 255, 0, 0,
+						  0, 255, 255, 0, 0,
+						  0, 0,   0,   0, 0,
+						  0, 0,   0,   0, 0),
+                  test6 = (cv::Mat_<uint8_t>(5, 5) <<
+						  0, 0,   0,   0, 0,
+						  0, 255, 0,   0, 0,
+						  0, 0,   255, 0, 0,
+						  0, 0,   0,   0, 0,
+						  0, 0,   0,   0, 0),
+                  test7 = (cv::Mat_<uint8_t>(5, 5) <<
+						  255, 255, 255, 255, 255,
+						  255, 255, 255, 255, 255,
+						  255, 255, 255, 255, 255,
+						  255, 255, 255, 255, 255,
+						  255, 255, 255, 255, 255),
+                  test8 = (cv::Mat_<uint8_t>(5, 5) <<
+						  255, 255, 255, 0, 0,
+						  255, 255, 255, 0, 0,
+						  255, 255, 255, 0, 0,
+						  0,   0,   0,   0, 0,
+						  0,   0,   0,   0, 0),
+                  test9 = (cv::Mat_<uint8_t>(5, 5) <<
+						  255, 255, 255, 255, 0,
+						  255, 255, 255, 255, 0,
+						  255, 255, 255, 255, 0,
+						  255, 255, 255, 255, 0,
+						  0,   0,   0,   0,   0);
+
+TEST(Dilation, MonoThreaded) {
+	EXPECT_TRUE(assert_mat_equal(dilate(test1, 1), test1));
+
+	EXPECT_TRUE(assert_mat_equal(dilate(test2, 0), test2));
+	EXPECT_TRUE(assert_mat_equal(dilate(test2, 1), test4));
+	EXPECT_TRUE(assert_mat_equal(dilate(test2, 2), test2));
+	EXPECT_TRUE(assert_mat_equal(dilate(test2, 1337), test2));
+
+	EXPECT_TRUE(assert_mat_equal(dilate(test3, 0), test3));
+	EXPECT_TRUE(assert_mat_equal(dilate(test3, 1), test5));
+	EXPECT_TRUE(assert_mat_equal(dilate(test3, 2), test6));
+	EXPECT_TRUE(assert_mat_equal(dilate(test3, 1337), test3));
+}
+
+TEST(Dilation, OpenMP) {
+	EXPECT_TRUE(assert_mat_equal(dilate_omp(test1, 1), test1));
+
+	EXPECT_TRUE(assert_mat_equal(dilate_omp(test2, 0), test2));
+	EXPECT_TRUE(assert_mat_equal(dilate_omp(test2, 1), test4));
+	EXPECT_TRUE(assert_mat_equal(dilate_omp(test2, 2), test2));
+	EXPECT_TRUE(assert_mat_equal(dilate_omp(test2, 1337), test2));
+
+	EXPECT_TRUE(assert_mat_equal(dilate_omp(test3, 0), test3));
+	EXPECT_TRUE(assert_mat_equal(dilate_omp(test3, 1), test5));
+	EXPECT_TRUE(assert_mat_equal(dilate_omp(test3, 2), test6));
+	EXPECT_TRUE(assert_mat_equal(dilate_omp(test3, 1337), test3));
+}
+
+TEST(Dilation, OpenCL) {
+	cl_singletons::setup();
+
+	EXPECT_TRUE(assert_mat_equal(dilate_cl(test1, 1).get(), test1));
+
+	EXPECT_TRUE(assert_mat_equal(dilate_cl(test2, 0).get(), test2));
+	EXPECT_TRUE(assert_mat_equal(dilate_cl(test2, 1).get(), test4));
+	EXPECT_TRUE(assert_mat_equal(dilate_cl(test2, 2).get(), test7));
+	EXPECT_TRUE(assert_mat_equal(dilate_cl(test2, 1337).get(), test7));
+
+	EXPECT_TRUE(assert_mat_equal(dilate_cl(test3, 0).get(), test3));
+	EXPECT_TRUE(assert_mat_equal(dilate_cl(test3, 1).get(), test8));
+	EXPECT_TRUE(assert_mat_equal(dilate_cl(test3, 2).get(), test9));
+	EXPECT_TRUE(assert_mat_equal(dilate_cl(test3, 1337).get(), test7));
+}
+
+TEST(Dilation, DISABLED_AllImplementations) {
 	cl_singletons::setup();
 
 	const std::vector<std::string> images = {
