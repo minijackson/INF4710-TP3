@@ -7,7 +7,7 @@
 TEST(Sobel, MonoThreaded) {
 
 	//Mat lena = imread("../data/lena.jpg", CV_LOAD_IMAGE_COLOR);
-	//cv::Mat_<cv::Vec3b> test =  cv::imread("../data/lena.png", cv::IMREAD_COLOR);
+	cv::Mat_<cv::Vec3b> lena =  cv::imread("../data/lena.png", cv::IMREAD_COLOR);
 
 
 	cv::Mat_<cv::Vec3b> expectedFastResult =  (cv::Mat_<cv::Vec3b>(5,5) <<	cv::Vec3b{0, 0, 0}, cv::Vec3b{0 , 0 , 0 }, cv::Vec3b{0 , 0 , 0 }, cv::Vec3b{0, 0, 0}, cv::Vec3b{0, 0, 0},
@@ -78,4 +78,7 @@ TEST(Sobel, MonoThreaded) {
 
 	EXPECT_TRUE(assert_mat_equal(myResult, expectedResult));
 	EXPECT_TRUE(assert_mat_equal(myFastResult, expectedFastResult));
+
+	cv::imshow("lenasobel", sobel(lena));
+	cv::waitKey(0);
 }

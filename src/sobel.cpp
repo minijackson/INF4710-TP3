@@ -1,8 +1,8 @@
 #include "sobel.hpp"
 #include <cmath>
 
-const cv::Mat_<int8_t> sobelx = (cv::Mat_<int8_t>(3,3) << -1, 0, 1, -2, 0, 2, -1, 0, 1);
-const cv::Mat_<int8_t> sobely = (cv::Mat_<int8_t>(3,3) << -1, -2, -1, 0, 0, 0, 1, 2, 1);
+const cv::Mat_<int8_t> sobelx = (cv::Mat_<int8_t>(3,3) << 1, 0, -1, 2, 0, -2, 1, 0, -1);
+const cv::Mat_<int8_t> sobely = (cv::Mat_<int8_t>(3,3) << 1, 2, 1, 0, 0, 0, -1, -2, -1);
 
 void initializeBordersToZero(cv::Mat_<cv::Vec3b>& FGRGB) {
 	int rowMax = FGRGB.rows-1;
@@ -75,9 +75,12 @@ cv::Mat_<cv::Vec3b> sobel(cv::Mat_<cv::Vec3b> RGB) {
 			greenFG = std::sqrt(greenGx * greenGx	+ greenGy	* greenGy);
 			blueFG	= std::sqrt(blueGx	* blueGx	+ blueGy	* blueGy);
 
-			FGRGB.at<cv::Vec3b>(x - 1, y - 1)[0] = blueFG;
-			FGRGB.at<cv::Vec3b>(x - 1, y - 1)[1] = greenFG;
-			FGRGB.at<cv::Vec3b>(x - 1, y - 1)[2] = redFG;
+			if(redFG > 255)		FGRGB.at<cv::Vec3b>(x - 1, y - 1)[2] = 255;
+			else				FGRGB.at<cv::Vec3b>(x - 1, y - 1)[2] = redFG;
+			if(greenFG > 255)	FGRGB.at<cv::Vec3b>(x - 1, y - 1)[1] = 255;
+			else				FGRGB.at<cv::Vec3b>(x - 1, y - 1)[1] = greenFG;
+			if(blueFG > 255)	FGRGB.at<cv::Vec3b>(x - 1, y - 1)[0] = 255;
+			else				FGRGB.at<cv::Vec3b>(x - 1, y - 1)[0] = blueFG;
 		}
 	}
 	return FGRGB;
