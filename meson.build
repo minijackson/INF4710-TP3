@@ -10,6 +10,7 @@ opencl_dep = declare_dependency(link_args: '-lOpenCL')
 sources = ['src/sobel.cpp',
            'src/threshold.cpp',
            'src/dilation.cpp',
+           'src/edge_ratio.cpp',
 		   'src/opencl.cpp']
 
 main = executable(

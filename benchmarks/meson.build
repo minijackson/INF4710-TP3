@@ -34,6 +34,14 @@ dilation_bench = executable(
 	dependencies: [opencv_dep, opencl_dep, hayai]
 )
 
+edge_ratio_bench = executable(
+	'edge_ratio_bench.bin',
+	['edge_ratio.cpp'],
+	cpp_pch: ['pch/pch.hpp'],
+	link_with: main_lib,
+	dependencies: [opencv_dep, opencl_dep, hayai]
+)
+
 # Register benchmarks
 
 benchmark(
@@ -61,6 +69,13 @@ benchmark(
 	'Dilation',
 	dilation_bench,
 	args: ['-o', 'json:dilation.json', '-o', 'console'],
+	timeout: 1200
+)
+
+benchmark(
+	'Edge Ratio',
+	edge_ratio_bench,
+	args: ['-o', 'json:edge_ratio.json', '-o', 'console'],
 	timeout: 1200
 )
 
