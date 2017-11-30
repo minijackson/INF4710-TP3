@@ -10,6 +10,7 @@
 
 namespace cl_singletons {
 
+	extern cl::Kernel sobel_kernel;
 	extern cl::Kernel threshold_kernel;
 	extern cl::Kernel dilation_kernel;
 

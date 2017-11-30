@@ -4,7 +4,7 @@ sobel = executable(
 	'sobel_test.bin',
 	['sobel.cpp'],
 	link_with: main_lib,
-	dependencies: [opencv_dep, gtest_dep]
+	dependencies: [opencv_dep, gtest_dep, opencl_dep]
 )
 threshold = executable(
 	'threshold_test.bin',

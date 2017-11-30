@@ -6,6 +6,7 @@
 
 namespace cl_singletons {
 
+	cl::Kernel sobel_kernel;
 	cl::Kernel threshold_kernel;
 	cl::Kernel dilation_kernel;
 
@@ -45,6 +46,7 @@ namespace cl_singletons {
 		queue = cl::CommandQueue(context, devices[0]);
 		std::cout << "OpenCL command queue created" << std::endl;
 
+		sobel_kernel = kernel_from_file("../src/opencl/sobel.cl", "sobel");
 		threshold_kernel = kernel_from_file("../src/opencl/threshold.cl", "threshold");
 		dilation_kernel = kernel_from_file("../src/opencl/dilation.cl", "dilate");
 	}
