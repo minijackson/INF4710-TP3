@@ -26,9 +26,11 @@ int main(int argc, char const* argv[]) {
 			}
 			std::cout << "\nProcessing image at '" << oImagePathFlag.first << "'..." << std::endl;
 
-			sobel(oInput);
-		}
+			auto result = sobel(oInput);
+			cv::imshow("Sobel result", result);
 
+			cv::waitKey(0);
+		}
 	} catch(...) {
 		std::cerr << "Caught unhandled exception." << std::endl;
 	}

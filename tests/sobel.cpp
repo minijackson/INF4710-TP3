@@ -1,6 +1,72 @@
+#include "common.hpp"
+
 #include "gtest/gtest.h"
 
 #include "../src/sobel.hpp"
+
+cv::Mat_<cv::Vec3b> expectedFastResult =  (cv::Mat_<cv::Vec3b>(5,5) <<	cv::Vec3b{0, 0, 0}, cv::Vec3b{0 , 0 , 0 }, cv::Vec3b{0 , 0 , 0 }, cv::Vec3b{0, 0, 0}, cv::Vec3b{0, 0, 0},
+																		cv::Vec3b{0, 0, 0}, cv::Vec3b{40, 40, 40}, cv::Vec3b{40, 40, 40}, cv::Vec3b{0, 0, 0}, cv::Vec3b{0, 0, 0},
+																		cv::Vec3b{0, 0, 0}, cv::Vec3b{40, 40, 40}, cv::Vec3b{40, 40, 40}, cv::Vec3b{0, 0, 0}, cv::Vec3b{0, 0, 0},
+																		cv::Vec3b{0, 0, 0}, cv::Vec3b{40, 40, 40}, cv::Vec3b{40, 40, 40}, cv::Vec3b{0, 0, 0}, cv::Vec3b{0, 0, 0},
+																		cv::Vec3b{0, 0, 0}, cv::Vec3b{0 , 0 , 0 }, cv::Vec3b{0 , 0 , 0 }, cv::Vec3b{0, 0, 0}, cv::Vec3b{0, 0, 0});
+
+cv::Mat_<int8_t> test = (cv::Mat_<int8_t>(5, 5) <<	0, 0, 10, 10, 10,
+													0, 0, 10, 10, 10,
+													0, 0, 10, 10, 10,
+													0, 0, 10, 10, 10,
+													0, 0, 10, 10, 10);
+
+cv::Mat_<int8_t> testbis = (cv::Mat_<int8_t>(5, 5) <<	1, 1, 1, 1, 1,
+														1, 1, 1, 1, 1,
+														1, 1, 1, 1, 1,
+														1, 1, 1, 1, 1,
+														1, 1, 1, 1, 1);
+
+cv::Mat_<int8_t> gx = (cv::Mat_<int8_t>(5, 5) <<	0, 30, 30, 0, -30,
+													0, 40, 40, 0, -40,
+													0, 40, 40, 0, -40,
+													0, 40, 40, 0, -40,
+													0, 30, 30, 0, -30);
+
+cv::Mat_<int8_t> gy = (cv::Mat_<int8_t>(5, 5) <<	0, -10, -30, -40, -30,
+													0,	 0,	  0,   0,   0,
+													0,   0,   0,   0,   0,
+													0,   0,   0,   0,   0,
+													0, -10, -30, -40, -30);
+
+TEST(Sobel, MonoThreaded) {
+
+	cv::Mat_<int8_t> zeroRow = (cv::Mat_<int8_t>(1,7) << 0, 0, 0, 0, 0, 0, 0);
+	cv::Mat_<int8_t> zeroCol = (cv::Mat_<int8_t>(5,1) << 0, 0, 0, 0, 0);
+
+	cv::Mat_<cv::Vec3b> expectedResult(5, 5);
+
+	for(int row = 0; row < 5; ++row) {
+		for(int col = 0; col < 5; ++col) {
+			expectedResult.at<cv::Vec3b>(row, col)[0] = std::sqrt(gx(row, col) * gx(row, col) + gy(row, col) * gy(row, col));
+			expectedResult.at<cv::Vec3b>(row, col)[1] = std::sqrt(gx(row, col) * gx(row, col) + gy(row, col) * gy(row, col));
+			expectedResult.at<cv::Vec3b>(row, col)[2] = std::sqrt(gx(row, col) * gx(row, col) + gy(row, col) * gy(row, col));
+		}
+	}
+
+	cv::Mat_<cv::Vec3b> testIMG(5, 5);
+
+	for(int row = 0; row < 5; ++row)
+	{
+		for(int col = 0; col < 5; ++col)
+		{
+			testIMG.at<cv::Vec3b>(row, col)[0] = test(row, col);
+			testIMG.at<cv::Vec3b>(row, col)[1] = test(row, col);
+			testIMG.at<cv::Vec3b>(row, col)[2] = test(row, col);
+		}
+	}
+
+	cv::Mat_<cv::Vec3b> myResult = sobel(testIMG);
+	cv::Mat_<cv::Vec3b> myFastResult = fastsobel(testIMG);
+
+	EXPECT_TRUE(assert_mat_equal(myResult, expectedResult));
+	EXPECT_TRUE(assert_mat_equal(myFastResult, expectedFastResult));
+}
 
 TEST(Sobel, DISABLED_AllImplementations) {
 	cl_singletons::setup();
@@ -26,7 +92,8 @@ TEST(Sobel, DISABLED_AllImplementations) {
 		cv::cvtColor(input, input4, CV_RGB2RGBA, 4);
 
 		cv::imshow("Original", input);
-		//cv::imshow("Sobel (Naive)",  sobel(input));
+		cv::imshow("Sobel (Naive)",  sobel(input));
+		cv::imshow("Sobel (Naive Fast)",  sobel(input));
 		//cv::imshow("Sobel (OpenMP)", sobel_omp(input));
 		cv::imshow("Sobel (OpenCL)", sobel_cl(input4).get());
 		//cv::imshow("Sobel (OpenCV)", sobel_cv(input));
