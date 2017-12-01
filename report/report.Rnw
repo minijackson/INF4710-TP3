@@ -38,7 +38,7 @@
 \renewcommand\listoflistingscaption{Liste des extraits de code}
 
 \author{Rémi \textsc{Nicole} \and Stéphane \textsc{Tzvetkov}}
-\title{TP3 Indexation de fichiers multimédia : décomposition en prises de vues}
+\title{TP3 Indexation de fichiers multimédia: décomposition en prises de vues}
 
 \begin{document}
 
@@ -51,63 +51,63 @@
 \section{Présentation du problème, survol de la méthode}
 \label{Présentation problème}
 
-La décomposition en prises de vues est une méthode consistant à détecter les
+\paragraph{}La décomposition en prises de vues est une méthode consistant à détecter les
 transitions entre différentes scènes. Une prise de vue est donc un segment /
 une séquence vidéo entre le début et la fin d'une scène. Ainsi cette séquence
 possède un contenu plutôt « homogène » dans la mesure où elle ne contiendra pas
-de grande variation de lieu ou d'action. A terme l'objectif de cette
+de grandes variations de lieu ou d'action. À terme l'objectif de cette
 décomposition est donc d'extraire quelques images clés de chacune de ces
 séquences afin de les décrire avec un maximum de précision. Dans ce TP, nous
 nous contenterons d'implémenter la meilleure méthode de détection de prises de
-vues en nos moyens.
+vues en nos moyens, afin d'extraire une prise de vue par scène détectée.
 
-La décomposition en prises de vue est une méthode qui peut être abordée avec
-l'utilisation d'histogrammes des vidéos que l'on décompose. Un histogramme,
-en multimédia, est la représentation statistique d'une trame : il s'agit de
+\paragraph{}La décomposition en prises de vue est une méthode qui peut être abordée avec
+l'utilisation des histogrammes extraites des trames des vidéos que l'on décompose. Un histogramme,
+en multimédia, est la représentation statistique d'une trame: il s'agit de
 déterminer la distribution des couleurs dans l'image. On peut fusionner les
 histogrammes de chaque canal de couleur (rouge, vert, bleu), ou on peut les
 traiter séparément. Par exemple l'histogramme du canal rouge d'une image
-représentera le nombre d'occurrence de chacune des valeurs de rouge de l'image
+représentera le nombre d'occurrences de chacune des valeurs de rouge de l'image
 (de 0 à 255 s'il s'agit d'un canal de huit bits). Cependant, généralement on ne
 quantifie pas un histogramme sur 255 niveaux (pour un canal de huit bits), on
-le quantifiera plutôt sur 16 niveaux par exemple. Dans ce cas là, un pixel
-ayant une valeur rouge de 249 incrémentera le nombre d'occurrence du seuil 16.
+le quantifiera plutôt sur 16 niveaux par exemple. Dans ce cas-là, un pixel
+ayant une valeur rouge de 249 incrémentera le nombre d'occurrences du seuil 16.
 On quantifie sur moins de niveaux pour éviter d'avoir un histogramme « trop »
 précis, qui serait trop sensible au bruit. Pour décomposer en prises de vues,
 on comparera simplement les histogrammes entre eux successivement, en extrayant
 leur différence (distance euclidienne) et en la comparant au seuil de coupure
 et au seuil d'effets spéciaux.
 
-La méthode des histogrammes vous a été brièvement présentée ici, même si ce
+\paragraph{}La méthode des histogrammes vous a été brièvement présentée ici, même si ce
 n'est pas la méthode retenue dans ce TP, car nous comparerons cette méthode à celle qui nous utiliserons
 lorsque nous discuterons des avantages et des inconvénients de la méthode que
 nous nous apprêtons à vous présenter.
 
-Une autre méthode --- celle que nous abordons dans ce TP --- pour effectuer la
-décomposition en prises de vues consiste à comparer des arêtes. Cette fois ci
+\paragraph{}Une autre méthode --- celle que nous abordons dans ce TP --- pour effectuer la
+décomposition en prises de vues consiste à comparer des arrêtes. Cette fois-ci
 chaque trame n'est pas représentée par son histogramme mais par son gradient,
-lorsqu'un gradient dépasse un certain seuil, on le considère comme un arrête.
+lorsqu'un gradient dépasse un certain seuil, on le considère comme une arrête.
 
-Pour calculer ce gradient on applique une convolution entre des filtres et la
+\paragraph{}Pour calculer ce gradient on applique une convolution entre des filtres et la
 trame. Par la suite on va effectuer un seuillage, c'est-à-dire récupérer
 les gradients dépassant un certain seuil, afin d'obtenir nos arrêtes.
 
-Pour déterminer de nouvelles arrêtes dans une prise de vue, on va chercher les
+\paragraph{}Pour déterminer de nouvelles arrêtes dans une prise de vue, on va chercher les
 arrêtes entrantes ainsi que les arrêtes sortantes. Pour détecter les
 arrêtes entrantes et sortantes il faut pouvoir définir un voisinage de recherche
-autour d'elles : pour cela chaque image d'arrêtes sera comparée à la version
+autour d'elles: pour cela chaque image d'arrêtes sera comparée à la version
 « dilatée » (c'est-à-dire une image où les traits des arrêtes sont épaissis)
 de la trame suivante et précédente. Si une arrête est détectée en dehors d'une
 zone d'arrête épaissi de la trame précédente, alors on considère que cette
 arrête est nouvelle (entrante ou sortante).
 
-Si la proportion d'arrêtes entrantes et d'arrêtes sortantes est très élevée,
+\paragraph{}Si la proportion d'arrêtes entrantes et d'arrêtes sortantes est très élevée,
 voir maximale, alors on considère qu'une coupure a eu lieu. Si cette proportion
 est juste élevée, plus que la normale, alors on considère qu'une gradation ou
 un fondu est en cours.
 
-De cette façon on est donc suceptible de détecter tous les changements de
-scènes. Mais avant de vous détailler notre méthode de détection, nous allons
+\paragraph{}De cette façon on est donc susceptible de détecter tous les changements de
+scènes. Mais avant de vous présenter nos résultats, nous allons
 d'abord nous intéresser aux étapes intermédiaires brièvement abordées
 précédemment.
 
@@ -115,129 +115,129 @@ précédemment.
   de la dilatation et du calcul ratio}
 \label{Présentation étapes}
 
-Nous étudierons ici le détail des traitements réalisant la détection des
+\paragraph{}Nous étudierons ici le détail des traitements réalisant la détection des
 changements de scènes via les arrêtes. Ainsi nous aborderons successivement
 les étapes de convolutions, de seuillage, de dilatation et de calcul du ratio.
 
 \subsection{Convolution d'images avec les filtres de Sobel}
 \label{Convolution}
 
-Les filtres de sobel sont deux matrices 3x3, l'une permettant la création d'un
+\paragraph{}Les filtres de sobel sont deux matrices 3x3, l'une permettant la création d'un
 gradient selon les l'axe des abscisses, l'autre selon l'axe des ordonnées.
 Elles s'appliquent à chaque pixel de la trame, les gradients axiaux résultants
 dépendant donc des valeurs des voisins du pixel concerné.
 
-Un fois que les grandiants en $x$ et en $y$ d'un pixel ont été calculés, la
-norme (ou « force ») du gradiant final de ce pixel est simplement la somme de
+\paragraph{}Une fois que les gradients en $x$ et en $y$ d'un pixel ont été calculés, la
+norme (ou « force ») du gradient final de ce pixel est simplement la somme de
 leur valeur absolue.
 
-Ainsi, en appliquant ces matrices sur chacun des pixels de l'image on obtient
+\paragraph{}Ainsi, en appliquant ces matrices sur chacun des pixels de l'image on obtient
 l'image des normes des gradients associée, qu'on appelle aussi la carte des
 forces des gradients.
 
-Il faut juste remarquer que la valeur de la nomre d'un grandiant doit être
+\paragraph{}Il faut juste remarquer que la valeur de la norme d'un grandient doit être
 comprise entre 0 et 255 dans le cas d'un canal sur huit bits : on dit que la
 norme du gradient est normalisé. Par ailleurs, les pixels appartenant aux bords
 de l'image, manquant de voisins, ne sont pas traités. Ils sont donc ignorés et
-concervés tels quels dans la carte de la force des gradients normalisés.
+conservés tels quels dans la carte de la force des gradients normalisés.
 
-De plus on précisera qu'ici notre implémentation effectue ce filtre sur chacun
+\paragraph{}De plus on précisera qu'ici notre implémentation effectue ce filtre sur chacun
 des canaux, rouge, vert et bleu, sans les fusionner vers une image en tons de
-gris au préalable : afin de perdre le moins d'information possible. Notre carte
+gris au préalable: afin de perdre le moins d'information possible. Notre carte
 des forces des gradients normalisés est donc en couleurs.
 
 \subsection{Seuillage de la carte}
 \label{seuillage carte}
 
-Le seuillage de la carte consiste d'abord à extraire l'intensité de la
+\paragraph{}Le seuillage de la carte consiste d'abord à extraire l'intensité de la
 luminosité de chaque pixel en fonction de la luminosité résultante des trois
 canaux. Si cette intensité dépasse un certain seuil, alors le pixel résultant
 dans l'image seuillée sera blanc (valeur 255 sur un canal de huit bits), sinon
 il sera noir (valeur 0 sur un canal de huit bits).
 
-Ainsi l'image seuillée est une bitmap (une image binaire), c'est à dire une
+\paragraph{}Ainsi l'image seuillée est une bitmap (une image binaire), c'est-à-dire une
 image sur un canal dont les pixels sont soit tout noir, soit tout blanc. Les
-arrêtes --- les normes des gradients combinés sur tois canaux dépassant le
+arrêtes --- les normes des gradients combinés sur trois canaux dépassant le
 seuil de luminosité --- sont donc les pixels blancs de l'image.
 
-On remarquera que le calcule de l'intensité lumineuse consiste juste à faire
+\paragraph{}On remarquera que le calcule de l'intensité lumineuse consiste juste à faire
 la moyenne des trois canaux d'un pixel. Dans notre implémentation, si cette
-moyenne (donc l'intensité du pixel) est suppérieure à 127, alors on considère
+moyenne (donc l'intensité du pixel) est supérieure à 127, alors on considère
 que le pixel résultant dans la bitmap sera blanc et formera donc un arrête,
 sinon il sera noir. Une fois cette méthode appliquée à chaque pixel de la carte
-des foces des gradients normalisés, on obtient notre image d'arrêtes.
+des forces des gradients normalisés, on obtient notre image d'arrêtes.
 
 \subsection{Dilatation des arrêtes}
 \label{Dilatation arrêtes}
 
-A présent que nous avons notre image d'arrêtes, il faut avoir les outils
+\paragraph{}A présent que nous avons notre image d'arrêtes, il faut avoir les outils
 nécessaires pour détecter les nouvelles arrêtes entrantes, ainsi que pour
 détecter les arrêtes sortantes. Pour cela la méthode retenue est de dilater
-les arrêtes de la trame précédente et de la trame courrante, afin de pouvoir
+les arrêtes de la trame précédente et de la trame courante, afin de pouvoir
 les comparer par la suite (les détails de cette comparaison seront abordés dans
 la sous-section suivante).
 
-Ainsi il faut être capable de dilater les arrêtes d'une image binaire
-d'arrêtes dont la méthode d'obtenttion à été présentée précédemment.
-La dilatation est faite simplement : pour chaque pixel blanc de l'image binaire
+\paragraph{}Ainsi il faut être capable de dilater les arrêtes d'une image binaire
+d'arrêtes dont la méthode d'obtention a été présentée précédemment.
+La dilatation est faite simplement: pour chaque pixel blanc de l'image binaire
 de départ, on transforme tous ses voisins en des pixels blancs dans l'image
-d'arrivée. Le voisinage est d'une taille paramètrable, qui représente
+d'arrivée. Le voisinage est d'une taille paramétrable, qui représente
 finalement la taille de la dilatation des arrêtes.
 
-Pour chaque pixel de l'image binaire d'entrée on parcourt donc tous leurs
-voisins selon la taille de la dilatation choisie : ils seront transformés en
+\paragraph{}Pour chaque pixel de l'image binaire d'entrée on parcourt donc tous leurs
+voisins selon la taille de la dilatation choisie: ils seront transformés en
 pixels blancs dans l'image binaire de sortie. On obtient ainsi l'image binaire
 dilatée souhaitée.
 
 \subsection{Calcul du ratio des arrêtes partagées}
 \label{calcul ratios}
 
-Enfin on s'intéresse à déterminer quelle est le pourcentage d'arrêtes entrantes
+\paragraph{}Enfin on s'intéresse à déterminer quelle est le pourcentage d'arrêtes entrantes
 ainsi que le pourcentage d'arrêtes sortantes entre deux images : l'image
-courrante et l'image suivante. Pour déterminer si une arrête est entrante ou
-sortante voici la méhtode logique à suivre :
+courante et l'image suivante. Pour déterminer si une arrête est entrante ou
+sortante voici la méthode logique à suivre:
 
 \begin{itemize}
   \item Si une arrête de la trame suivante n'appartient pas ou « dépasse »
-        des arrêtes dilatées de la trame courrante : alors c'est une arrête
+        des arrêtes dilatées de la trame courante : alors c'est une arrête
         entrante.
-  \item Si une arrête de la trame courrante n'appartient pas ou « dépasse »
+      \item Si une arrête de la trame courante n'appartient pas ou « dépasse »
         des arrêtes dilatées de la trame suivante : alors c'est une arrêtes
         sortante.
 \end{itemize}
 
-Calculer la proportion d'arrêtes entrantes et sortantes revient donc à :
+\paragraph{}Calculer la proportion d'arrêtes entrantes et sortantes revient donc à:
 
 \begin{itemize}
-  \item Proportion d'arrêtes entrantes : il suffit de compter le nombre de
+  \item Proportion d'arrêtes entrantes: il suffit de compter le nombre de
     pixels blancs partagés entre la trame d'arrêtes dilatée courrante et la
     trame d'arrêtes suivante, de diviser le tout par le nombre de pixels de
     la trame d'arrêtes suivante, et enfin de soustraire le tout à 1.
-  \item Proportion d'arrêtes sortantes : il suffit de compter le nombre de
+  \item Proportion d'arrêtes sortantes: il suffit de compter le nombre de
     pixels blancs partagés entre la trame d'arrêtes courrante et la trame
     d'arrêtes dilatées suivante, de diviser le tout par le nombre de pixels
     blancs de la trame d'arrêtes courrante, et enfin de soustraire le tout à 1.
 \end{itemize}
 
-Ainsi on peut déterminer la proportion d'arrêtes entrantes et sortantes entre
+\paragraph{}Ainsi on peut déterminer la proportion d'arrêtes entrantes et sortantes entre
 deux images. Si cette proportion est très élevée, alors on peut dire qu'une
 coupure a eu lieu entre ces deux images. Si cette proportion est seulement un
-un peu plus élevée que la normale, alors une gradation ou un fondu est
+peu plus élevée que la normale, alors une gradation ou un fondu est
 probablement en cours.
 
-De cette façon notre méthode de détection de changement de scènes via la
+\paragraph{}De cette façon notre méthode de détection de changement de scènes via la
 méthode des arrêtes est complète.
 
 \subsection{Benchmarking}
 \label{Benchmarking}
 
-Toutes les étapes présentées précédemment on été implémentées de plusieurs
-façons : sur un seul coeur / thread CPU, sur tous les coeurs / thread CPU
-diponibles, sur la carte graphique, et via les méthodes openCV préexistantes.
-Dans un soucis d'efficacité, la méthode finale ne retiendra que les
+\paragraph{}Toutes les étapes présentées précédemment ont été implémentées de plusieurs
+façons: sur un seul cœur / thread CPU, sur tous les cœur/ thread CPU
+disponibles, sur la carte graphique, et via les méthodes openCV préexistantes.
+Dans un souci d'efficacité, la méthode finale ne retiendra que les
 implémentations les plus performantes. Toutes les implémentations de toutes les
-étapes seront comparées et selectionnées lorsque nous vous présenterons nos
-résultas après avoir discuté des avantages et des inconvénients de notre
+étapes seront comparées et sélectionnées lorsque nous vous présenterons nos
+résultats après avoir discuté des avantages et des inconvénients de notre
 méthode.
 
 \clearpage
@@ -245,7 +245,7 @@ méthode.
 \section{Discussion sur les avantages et les inconvénients de la méthode}
 \label{Discussion avantages inconvénients}
 
-La décomposition en prises de vues via les histogrammes (tel que décrit en
+\paragraph{}La décomposition en prises de vues via les histogrammes (tel que décrit en
 introduction lors de la présentation du problème) compose ses histogrammes en
 fonction des couleurs présentes dans chaque trame. La différenciation entre
 deux trames se fait donc en fonction des couleurs.
@@ -253,28 +253,28 @@ Tandis que la décomposition en prises de vues via les arrêtes, comme vu
 précédemment, base sa différenciation sur la variation significative de bords
 entre deux trames.
 
-Ainsi la méthodes des arrêtes est plus efficace lorsqu'il s'agit de détecter un
-un changement de scène lorsque ce changement est basé sur le mouvement (ou sur
-des effets assimilable à du mouvement : comme une coupure), par contre si ce
+\paragraph{}Ainsi la méthode des arrêtes est plus efficace lorsqu'il s'agit de détecter un
+changement de scène lorsque ce changement est basé sur le mouvement (ou sur
+des effets assimilable à du mouvement: comme une coupure), par contre si ce
 changement est basé sur une variation de couleurs (ce qui est plus rare) alors
 la méthode des histogrammes devraient être plus pertinente.
 
-Cela dit, une scène comportant beaucoup de mouvements et d'action risque d'être
+\paragraph{}Cela dit, une scène comportant beaucoup de mouvements et d'action risque d'être
 plus difficile à délimiter avec la méthode des arrêtes, car on aura du mal à
 faire la différence entre la transition / coupure du reste de la scène qui
 implique déjà une grande variation de bordures.
 
-De la même manière, une scène comportant beaucoup de variations de couleurs
+\paragraph{}De la même manière, une scène comportant beaucoup de variations de couleurs
 (ce qui semble plus rare)
 serait plus difficile à délimiter avec la méthode des histogrammes, car là
 aussi il est difficile de faire la différence en la transition / coupure du
 reste de la scène qui implique déjà beaucoup de variations de couleurs.
 
-Ainsi, chaque méthode présente ses avantages et ses inconvénients. Les
+\paragraph{}Ainsi, chaque méthode présente ses avantages et ses inconvénients. Les
 changements de scènes semblent plus significativement effectués par variation
 de mouvement (ou effet assimilable à un mouvement) que par variation de
 couleurs (qui semble plus rare). Cependant les scènes comportant beaucoup de
-de mouvement / action semblent aussi plus fréquentes que les scènes comportant
+mouvement / action semblent aussi plus fréquentes que les scènes comportant
 de grandes variations de couleurs (plus rares), ce qui rend plus difficile la
 délimitation de la scène.
 
@@ -287,7 +287,8 @@ WoouuaaauuooW les booooooooo graphs !!!
 \section{Discussion sur les améliorations possibles}
 \label{Discussion améliorations}
 
-Aucune amélioration : c'est parfait.
+Aucune amélioration: c'est parfait.
+Avoir les bons facteurs impliquerait 
 
 %~\clearpage
 
