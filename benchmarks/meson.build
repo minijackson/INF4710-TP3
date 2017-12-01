@@ -7,7 +7,7 @@ sobel_bench = executable(
 	['sobel.cpp'],
 	cpp_pch: ['pch/pch.hpp'],
 	link_with: main_lib,
-	dependencies: [opencv_dep, hayai]
+	dependencies: [opencv_dep, opencl_dep, hayai]
 )
 
 threshold_components_bench = executable(
