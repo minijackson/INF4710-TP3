@@ -1,3 +1,4 @@
+#include "cl_mat.hpp"
 #include "opencl.hpp"
 
 #include "dilation.hpp"
@@ -8,9 +9,10 @@
 #include <opencv2/opencv.hpp>
 
 #include <iostream>
+#include <optional>
 
-constexpr const double LIMIT    = 0.6;
-constexpr const double FX_LIMIT = 0.8;
+constexpr const double LIMIT    = 0.5;
+constexpr const double FX_LIMIT = 0.99;
 
 constexpr const int PROGRESS_BAR_SIZE = 42;
 
@@ -43,6 +45,8 @@ int main() {
 
 	cv::Mat_<uint8_t> first_thresh_res = pipeline(first_frame4);
 
+	std::optional<cv::Mat_<uint8_t>> saved_dilated_buffer;
+
 	while(!second_frame.empty()) {
 		if(frame_id % 50 == 0) {
 			size_t progress = (frame_id / (double)frame_count) * PROGRESS_BAR_SIZE;
@@ -55,18 +59,31 @@ int main() {
 
 		cv::Mat_<uint8_t> second_thresh_res = pipeline(second_frame4);
 
-		const auto first_dilation_res = dilate_cl(first_thresh_res, 3);
+		auto first_dilation_res = dilate_cl(first_thresh_res, 2);
 
 		const double ratio = edge_ratio_omp(first_dilation_res.get(), second_thresh_res);
 
 		if(ratio < LIMIT) {
-			// std::cout << "Ratio = " << ratio << ", pushing_back\n";
-			// cv::imshow("Dilated", first_dilation_res.get());
-			// cv::imshow("Next treshed", second_thresh_res);
-			// cv::waitKey(0);
+			std::cout << "ratio over 9000!\n";
 			scenes.push_back(second_frame.clone());
 		} else if(ratio < FX_LIMIT) {
-			std::cout << "TODO\n";
+			if(saved_dilated_buffer) {
+
+				const double saved_ratio = edge_ratio_omp(*saved_dilated_buffer, second_thresh_res);
+
+				if(saved_ratio < LIMIT) {
+					std::cout << "saved ratio over 9000!\n";
+					scenes.push_back(second_frame.clone());
+					saved_dilated_buffer = std::nullopt;
+				}
+
+			} else {
+				std::cout << "Saving current dilated frame\n";
+				saved_dilated_buffer = first_dilation_res.get().clone();
+			}
+		} else if(saved_dilated_buffer) {
+			std::cout << "Abandon saved dilated frame\n";
+			saved_dilated_buffer = std::nullopt;
 		}
 
 		first_thresh_res = second_thresh_res;
