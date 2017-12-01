@@ -70,16 +70,16 @@ CLMat<uint8_t> dilate_cl(cv::Mat_<uint8_t> const& input, const size_t radius) {
 	cl::Image2D input_buffer(cl_singletons::context,
 			CL_MEM_READ_ONLY,
 			cl::ImageFormat(CL_INTENSITY, CL_UNSIGNED_INT8),
-			input.rows,
 			input.cols,
+			input.rows,
 			/* image_row_pitch = */ 0,
 			input.data);
 
 	cl::Image2D output_buffer(cl_singletons::context,
 			CL_MEM_WRITE_ONLY,
 			cl::ImageFormat(CL_INTENSITY, CL_UNSIGNED_INT8),
-			input.rows,
 			input.cols,
+			input.rows,
 			/* image_row_pitch = */ 0);
 
 	cl::size_t<3> origin;
@@ -88,8 +88,8 @@ CLMat<uint8_t> dilate_cl(cv::Mat_<uint8_t> const& input, const size_t radius) {
 	origin.push_back(0);
 
 	cl::size_t<3> region;
-	region.push_back(input.rows);
 	region.push_back(input.cols);
+	region.push_back(input.rows);
 	region.push_back(1);
 
 	// Send the image to the device
@@ -106,10 +106,10 @@ CLMat<uint8_t> dilate_cl(cv::Mat_<uint8_t> const& input, const size_t radius) {
 			cl_singletons::dilation_kernel,
 			cl_singletons::queue,
 			/* global_work_offset = */ cl::NullRange,
-			/* global_work_size = */ cl::NDRange(input.rows, input.cols),
+			/* global_work_size = */ cl::NDRange(input.cols, input.rows),
 			/* local_work_size = */ cl::NullRange);
 
-	int iradius = std::min({static_cast<int>(radius), input.cols, input.rows});
+	int iradius = std::min({static_cast<int>(radius), input.rows, input.cols});
 
 	// Call it
 	dilate_cl_functor(input_buffer, iradius, output_buffer);

@@ -32,11 +32,18 @@ transition_detection = executable(
 	link_with: main_lib,
 	dependencies: [opencv_dep, gtest_dep]
 )
+integration = executable(
+	'integration.bin',
+	['integration.cpp'],
+	link_with: main_lib,
+	dependencies: [opencv_dep, gtest_dep, opencl_dep]
+)
 
 test('Sobel', sobel)
 test('Threshold', threshold)
 test('Dilation', dilation)
 test('Edge Ration', edge_ratio)
 test('Transition Detection', transition_detection)
+test('Integration', integration)
 
 # vim: ft=cmake

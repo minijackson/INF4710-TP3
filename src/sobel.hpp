@@ -4,5 +4,5 @@
 
 #include <opencv2/opencv.hpp>
 
-cv::Mat_<cv::Vec3b> sobel(cv::Mat_<cv::Vec3b> RGB);
+cv::Mat_<cv::Vec4b> sobel(cv::Mat_<cv::Vec4b> RGB);
 CLMat<cv::Vec4b> sobel_cl(cv::Mat_<cv::Vec4b> const& input);

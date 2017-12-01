@@ -2,109 +2,92 @@
 
 #include "opencl.hpp"
 
+#include <algorithm>
+
 #include <cmath>
 
 const cv::Mat_<int8_t> sobelx = (cv::Mat_<int8_t>(3, 3) << 1, 0, -1, 2, 0, -2, 1, 0, -1);
 const cv::Mat_<int8_t> sobely = (cv::Mat_<int8_t>(3, 3) << 1, 2, 1, 0, 0, 0, -1, -2, -1);
 
-void initializeBordersToZero(cv::Mat_<cv::Vec3b>& FGRGB) {
-	int rowMax = FGRGB.rows - 1;
-	int colMax = FGRGB.cols - 1;
+cv::Mat_<cv::Vec4b> sobel(cv::Mat_<cv::Vec4b> RGB) {
 
-	for(int row = 0; row < FGRGB.rows; ++row) {
-		for(int i = 0; i < 3; ++i) {
-
-			FGRGB.at<cv::Vec3b>(row, 0)[i]      = 0;
-			FGRGB.at<cv::Vec3b>(row, colMax)[i] = 0;
-		}
-	}
-
-	for(int col = 0; col < FGRGB.cols; ++col) {
-		for(int i = 0; i < 3; ++i) {
-			FGRGB.at<cv::Vec3b>(0, col)[i]      = 0;
-			FGRGB.at<cv::Vec3b>(rowMax, col)[i] = 0;
-		}
-	}
-}
-
-cv::Mat_<cv::Vec3b> sobel(cv::Mat_<cv::Vec3b> RGB) {
-
-	cv::Mat_<cv::Vec3b> FGRGB(RGB.rows, RGB.cols);
-
-	initializeBordersToZero(FGRGB);
+	cv::Vec4b nullVec{0, 0, 0, 255};
+	cv::Mat_<cv::Vec4b> FGRGB(RGB.rows, RGB.cols, nullVec);
 
 	for(int x = 1; x < RGB.rows - 1; ++x) {
 		for(int y = 1; y < RGB.cols - 1; ++y) {
 
-			int redGx = (sobelx(0, 0) * RGB.at<cv::Vec3b>(x - 1, y - 1)[2]) +
-			            (sobelx(0, 1) * RGB.at<cv::Vec3b>(x, y - 1)[2]) +
-			            (sobelx(0, 2) * RGB.at<cv::Vec3b>(x + 1, y - 1)[2]) +
-			            (sobelx(1, 0) * RGB.at<cv::Vec3b>(x - 1, y)[2]) +
-			            (sobelx(1, 1) * RGB.at<cv::Vec3b>(x, y)[2]) +
-			            (sobelx(1, 2) * RGB.at<cv::Vec3b>(x + 1, y)[2]) +
-			            (sobelx(2, 0) * RGB.at<cv::Vec3b>(x - 1, y + 1)[2]) +
-			            (sobelx(2, 1) * RGB.at<cv::Vec3b>(x, y + 1)[2]) +
-			            (sobelx(2, 2) * RGB.at<cv::Vec3b>(x + 1, y + 1)[2]);
+			int redGx = (sobelx(0, 0) * RGB.at<cv::Vec4b>(x - 1, y - 1)[2]) +
+			            (sobelx(0, 1) * RGB.at<cv::Vec4b>(x, y - 1)[2]) +
+			            (sobelx(0, 2) * RGB.at<cv::Vec4b>(x + 1, y - 1)[2]) +
+			            (sobelx(1, 0) * RGB.at<cv::Vec4b>(x - 1, y)[2]) +
+			            (sobelx(1, 1) * RGB.at<cv::Vec4b>(x, y)[2]) +
+			            (sobelx(1, 2) * RGB.at<cv::Vec4b>(x + 1, y)[2]) +
+			            (sobelx(2, 0) * RGB.at<cv::Vec4b>(x - 1, y + 1)[2]) +
+			            (sobelx(2, 1) * RGB.at<cv::Vec4b>(x, y + 1)[2]) +
+			            (sobelx(2, 2) * RGB.at<cv::Vec4b>(x + 1, y + 1)[2]);
 
-			int redGy = (sobely(0, 0) * RGB.at<cv::Vec3b>(x - 1, y - 1)[2]) +
-			            (sobely(0, 1) * RGB.at<cv::Vec3b>(x, y - 1)[2]) +
-			            (sobely(0, 2) * RGB.at<cv::Vec3b>(x + 1, y - 1)[2]) +
-			            (sobely(1, 0) * RGB.at<cv::Vec3b>(x - 1, y)[2]) +
-			            (sobely(1, 1) * RGB.at<cv::Vec3b>(x, y)[2]) +
-			            (sobely(1, 2) * RGB.at<cv::Vec3b>(x + 1, y)[2]) +
-			            (sobely(2, 0) * RGB.at<cv::Vec3b>(x - 1, y + 1)[2]) +
-			            (sobely(2, 1) * RGB.at<cv::Vec3b>(x, y + 1)[2]) +
-			            (sobely(2, 2) * RGB.at<cv::Vec3b>(x + 1, y + 1)[2]);
+			int redGy = (sobely(0, 0) * RGB.at<cv::Vec4b>(x - 1, y - 1)[2]) +
+			            (sobely(0, 1) * RGB.at<cv::Vec4b>(x, y - 1)[2]) +
+			            (sobely(0, 2) * RGB.at<cv::Vec4b>(x + 1, y - 1)[2]) +
+			            (sobely(1, 0) * RGB.at<cv::Vec4b>(x - 1, y)[2]) +
+			            (sobely(1, 1) * RGB.at<cv::Vec4b>(x, y)[2]) +
+			            (sobely(1, 2) * RGB.at<cv::Vec4b>(x + 1, y)[2]) +
+			            (sobely(2, 0) * RGB.at<cv::Vec4b>(x - 1, y + 1)[2]) +
+			            (sobely(2, 1) * RGB.at<cv::Vec4b>(x, y + 1)[2]) +
+			            (sobely(2, 2) * RGB.at<cv::Vec4b>(x + 1, y + 1)[2]);
 
-			int greenGx = (sobelx(0, 0) * RGB.at<cv::Vec3b>(x - 1, y - 1)[1]) +
-			              (sobelx(0, 1) * RGB.at<cv::Vec3b>(x, y - 1)[1]) +
-			              (sobelx(0, 2) * RGB.at<cv::Vec3b>(x + 1, y - 1)[1]) +
-			              (sobelx(1, 0) * RGB.at<cv::Vec3b>(x - 1, y)[1]) +
-			              (sobelx(1, 1) * RGB.at<cv::Vec3b>(x, y)[1]) +
-			              (sobelx(1, 2) * RGB.at<cv::Vec3b>(x + 1, y)[1]) +
-			              (sobelx(2, 0) * RGB.at<cv::Vec3b>(x - 1, y + 1)[1]) +
-			              (sobelx(2, 1) * RGB.at<cv::Vec3b>(x, y + 1)[1]) +
-			              (sobelx(2, 2) * RGB.at<cv::Vec3b>(x + 1, y + 1)[1]);
+			int greenGx = (sobelx(0, 0) * RGB.at<cv::Vec4b>(x - 1, y - 1)[1]) +
+			              (sobelx(0, 1) * RGB.at<cv::Vec4b>(x, y - 1)[1]) +
+			              (sobelx(0, 2) * RGB.at<cv::Vec4b>(x + 1, y - 1)[1]) +
+			              (sobelx(1, 0) * RGB.at<cv::Vec4b>(x - 1, y)[1]) +
+			              (sobelx(1, 1) * RGB.at<cv::Vec4b>(x, y)[1]) +
+			              (sobelx(1, 2) * RGB.at<cv::Vec4b>(x + 1, y)[1]) +
+			              (sobelx(2, 0) * RGB.at<cv::Vec4b>(x - 1, y + 1)[1]) +
+			              (sobelx(2, 1) * RGB.at<cv::Vec4b>(x, y + 1)[1]) +
+			              (sobelx(2, 2) * RGB.at<cv::Vec4b>(x + 1, y + 1)[1]);
 
-			int greenGy = (sobely(0, 0) * RGB.at<cv::Vec3b>(x - 1, y - 1)[1]) +
-			              (sobely(0, 1) * RGB.at<cv::Vec3b>(x, y - 1)[1]) +
-			              (sobely(0, 2) * RGB.at<cv::Vec3b>(x + 1, y - 1)[1]) +
-			              (sobely(1, 0) * RGB.at<cv::Vec3b>(x - 1, y)[1]) +
-			              (sobely(1, 1) * RGB.at<cv::Vec3b>(x, y)[1]) +
-			              (sobely(1, 2) * RGB.at<cv::Vec3b>(x + 1, y)[1]) +
-			              (sobely(2, 0) * RGB.at<cv::Vec3b>(x - 1, y + 1)[1]) +
-			              (sobely(2, 1) * RGB.at<cv::Vec3b>(x, y + 1)[1]) +
-			              (sobely(2, 2) * RGB.at<cv::Vec3b>(x + 1, y + 1)[1]);
+			int greenGy = (sobely(0, 0) * RGB.at<cv::Vec4b>(x - 1, y - 1)[1]) +
+			              (sobely(0, 1) * RGB.at<cv::Vec4b>(x, y - 1)[1]) +
+			              (sobely(0, 2) * RGB.at<cv::Vec4b>(x + 1, y - 1)[1]) +
+			              (sobely(1, 0) * RGB.at<cv::Vec4b>(x - 1, y)[1]) +
+			              (sobely(1, 1) * RGB.at<cv::Vec4b>(x, y)[1]) +
+			              (sobely(1, 2) * RGB.at<cv::Vec4b>(x + 1, y)[1]) +
+			              (sobely(2, 0) * RGB.at<cv::Vec4b>(x - 1, y + 1)[1]) +
+			              (sobely(2, 1) * RGB.at<cv::Vec4b>(x, y + 1)[1]) +
+			              (sobely(2, 2) * RGB.at<cv::Vec4b>(x + 1, y + 1)[1]);
 
-			int blueGx = (sobelx(0, 0) * RGB.at<cv::Vec3b>(x - 1, y - 1)[0]) +
-			             (sobelx(0, 1) * RGB.at<cv::Vec3b>(x, y - 1)[0]) +
-			             (sobelx(0, 2) * RGB.at<cv::Vec3b>(x + 1, y - 1)[0]) +
-			             (sobelx(1, 0) * RGB.at<cv::Vec3b>(x - 1, y)[0]) +
-			             (sobelx(1, 1) * RGB.at<cv::Vec3b>(x, y)[0]) +
-			             (sobelx(1, 2) * RGB.at<cv::Vec3b>(x + 1, y)[0]) +
-			             (sobelx(2, 0) * RGB.at<cv::Vec3b>(x - 1, y + 1)[0]) +
-			             (sobelx(2, 1) * RGB.at<cv::Vec3b>(x, y + 1)[0]) +
-			             (sobelx(2, 2) * RGB.at<cv::Vec3b>(x + 1, y + 1)[0]);
+			int blueGx = (sobelx(0, 0) * RGB.at<cv::Vec4b>(x - 1, y - 1)[0]) +
+			             (sobelx(0, 1) * RGB.at<cv::Vec4b>(x, y - 1)[0]) +
+			             (sobelx(0, 2) * RGB.at<cv::Vec4b>(x + 1, y - 1)[0]) +
+			             (sobelx(1, 0) * RGB.at<cv::Vec4b>(x - 1, y)[0]) +
+			             (sobelx(1, 1) * RGB.at<cv::Vec4b>(x, y)[0]) +
+			             (sobelx(1, 2) * RGB.at<cv::Vec4b>(x + 1, y)[0]) +
+			             (sobelx(2, 0) * RGB.at<cv::Vec4b>(x - 1, y + 1)[0]) +
+			             (sobelx(2, 1) * RGB.at<cv::Vec4b>(x, y + 1)[0]) +
+			             (sobelx(2, 2) * RGB.at<cv::Vec4b>(x + 1, y + 1)[0]);
 
-			int blueGy = (sobely(0, 0) * RGB.at<cv::Vec3b>(x - 1, y - 1)[0]) +
-			             (sobely(0, 1) * RGB.at<cv::Vec3b>(x, y - 1)[0]) +
-			             (sobely(0, 2) * RGB.at<cv::Vec3b>(x + 1, y - 1)[0]) +
-			             (sobely(1, 0) * RGB.at<cv::Vec3b>(x - 1, y)[0]) +
-			             (sobely(1, 1) * RGB.at<cv::Vec3b>(x, y)[0]) +
-			             (sobely(1, 2) * RGB.at<cv::Vec3b>(x + 1, y)[0]) +
-			             (sobely(2, 0) * RGB.at<cv::Vec3b>(x - 1, y + 1)[0]) +
-			             (sobely(2, 1) * RGB.at<cv::Vec3b>(x, y + 1)[0]) +
-			             (sobely(2, 2) * RGB.at<cv::Vec3b>(x + 1, y + 1)[0]);
+			int blueGy = (sobely(0, 0) * RGB.at<cv::Vec4b>(x - 1, y - 1)[0]) +
+			             (sobely(0, 1) * RGB.at<cv::Vec4b>(x, y - 1)[0]) +
+			             (sobely(0, 2) * RGB.at<cv::Vec4b>(x + 1, y - 1)[0]) +
+			             (sobely(1, 0) * RGB.at<cv::Vec4b>(x - 1, y)[0]) +
+			             (sobely(1, 1) * RGB.at<cv::Vec4b>(x, y)[0]) +
+			             (sobely(1, 2) * RGB.at<cv::Vec4b>(x + 1, y)[0]) +
+			             (sobely(2, 0) * RGB.at<cv::Vec4b>(x - 1, y + 1)[0]) +
+			             (sobely(2, 1) * RGB.at<cv::Vec4b>(x, y + 1)[0]) +
+			             (sobely(2, 2) * RGB.at<cv::Vec4b>(x + 1, y + 1)[0]);
 
 			double redFG   = std::sqrt(redGx * redGx + redGy * redGy);
 			double greenFG = std::sqrt(greenGx * greenGx + greenGy * greenGy);
 			double blueFG  = std::sqrt(blueGx * blueGx + blueGy * blueGy);
 
-			FGRGB.at<cv::Vec3b>(x, y)[0] = blueFG;
-			FGRGB.at<cv::Vec3b>(x, y)[1] = greenFG;
-			FGRGB.at<cv::Vec3b>(x, y)[2] = redFG;
+			FGRGB.at<cv::Vec4b>(x, y)[0] = std::clamp(blueFG, 0.0, 255.0);
+			FGRGB.at<cv::Vec4b>(x, y)[1] = std::clamp(greenFG, 0.0, 255.0);
+			FGRGB.at<cv::Vec4b>(x, y)[2] = std::clamp(redFG, 0.0, 255.0);
+			FGRGB.at<cv::Vec4b>(x, y)[3] = 255;
 		}
 	}
+
 	return FGRGB;
 }
 
@@ -113,16 +96,16 @@ CLMat<cv::Vec4b> sobel_cl(cv::Mat_<cv::Vec4b> const& input) {
 	cl::Image2D input_buffer(cl_singletons::context,
 	                         CL_MEM_READ_ONLY,
 	                         cl::ImageFormat(CL_RGBA, CL_UNSIGNED_INT8),
-	                         input.rows,
 	                         input.cols,
+	                         input.rows,
 	                         /* image_row_pitch = */ 0,
 	                         input.data);
 
 	cl::Image2D output_buffer(cl_singletons::context,
 	                          CL_MEM_WRITE_ONLY,
 	                          cl::ImageFormat(CL_RGBA, CL_UNSIGNED_INT8),
-	                          input.rows,
 	                          input.cols,
+	                          input.rows,
 	                          /* image_row_pitch = */ 0);
 
 	cl::size_t<3> origin;
@@ -131,8 +114,8 @@ CLMat<cv::Vec4b> sobel_cl(cv::Mat_<cv::Vec4b> const& input) {
 	origin.push_back(0);
 
 	cl::size_t<3> region;
-	region.push_back(input.rows);
 	region.push_back(input.cols);
+	region.push_back(input.rows);
 	region.push_back(1);
 
 	// Send the image to the device
@@ -148,7 +131,7 @@ CLMat<cv::Vec4b> sobel_cl(cv::Mat_<cv::Vec4b> const& input) {
 	cl::KernelFunctor sobel_cl_functor(cl_singletons::sobel_kernel,
 	                                   cl_singletons::queue,
 	                                   /* global_work_offset = */ cl::NullRange,
-	                                   /* global_work_size = */ cl::NDRange(input.rows, input.cols),
+	                                   /* global_work_size = */ cl::NDRange(input.cols, input.rows),
 	                                   /* local_work_size = */ cl::NullRange);
 
 	// Call it

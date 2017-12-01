@@ -23,7 +23,7 @@ public:
 	      : buffer(buffer) {
 
 		if(region == std::array<size_t, 3>{{0, 0, 0}}) {
-			region = {{rows, cols, 1}};
+			region = {{cols, rows, 1}};
 		}
 
 		Element* mapped_memory = reinterpret_cast<Element*>(
@@ -64,6 +64,10 @@ public:
 	}
 
 	cv::Mat_<Element>& get() {
+		return *mat;
+	}
+
+	cv::Mat_<Element> const& get() const {
 		return *mat;
 	}
 
