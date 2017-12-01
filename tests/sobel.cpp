@@ -4,11 +4,11 @@
 
 #include "../src/sobel.hpp"
 
-cv::Mat_<cv::Vec3b> expectedResult =  (cv::Mat_<cv::Vec3b>(5,5) <<	cv::Vec3b{0, 0, 0}, cv::Vec3b{0 , 0 , 0 }, cv::Vec3b{0 , 0 , 0 }, cv::Vec3b{0, 0, 0}, cv::Vec3b{0, 0, 0},
-																	cv::Vec3b{0, 0, 0}, cv::Vec3b{40, 40, 40}, cv::Vec3b{40, 40, 40}, cv::Vec3b{0, 0, 0}, cv::Vec3b{0, 0, 0},
-																	cv::Vec3b{0, 0, 0}, cv::Vec3b{40, 40, 40}, cv::Vec3b{40, 40, 40}, cv::Vec3b{0, 0, 0}, cv::Vec3b{0, 0, 0},
-																	cv::Vec3b{0, 0, 0}, cv::Vec3b{40, 40, 40}, cv::Vec3b{40, 40, 40}, cv::Vec3b{0, 0, 0}, cv::Vec3b{0, 0, 0},
-																	cv::Vec3b{0, 0, 0}, cv::Vec3b{0 , 0 , 0 }, cv::Vec3b{0 , 0 , 0 }, cv::Vec3b{0, 0, 0}, cv::Vec3b{0, 0, 0});
+cv::Mat_<cv::Vec4b> expectedResult =  (cv::Mat_<cv::Vec4b>(5,5) <<	cv::Vec4b{0, 0, 0, 255}, cv::Vec4b{0 , 0 , 0 , 255}, cv::Vec4b{0 , 0 , 0 , 255}, cv::Vec4b{0, 0, 0, 255}, cv::Vec4b{0, 0, 0, 255},
+																	cv::Vec4b{0, 0, 0, 255}, cv::Vec4b{40, 40, 40, 255}, cv::Vec4b{40, 40, 40, 255}, cv::Vec4b{0, 0, 0, 255}, cv::Vec4b{0, 0, 0, 255},
+																	cv::Vec4b{0, 0, 0, 255}, cv::Vec4b{40, 40, 40, 255}, cv::Vec4b{40, 40, 40, 255}, cv::Vec4b{0, 0, 0, 255}, cv::Vec4b{0, 0, 0, 255},
+																	cv::Vec4b{0, 0, 0, 255}, cv::Vec4b{40, 40, 40, 255}, cv::Vec4b{40, 40, 40, 255}, cv::Vec4b{0, 0, 0, 255}, cv::Vec4b{0, 0, 0, 255},
+																	cv::Vec4b{0, 0, 0, 255}, cv::Vec4b{0 , 0 , 0 , 255}, cv::Vec4b{0 , 0 , 0 , 255}, cv::Vec4b{0, 0, 0, 255}, cv::Vec4b{0, 0, 0, 255});
 
 cv::Mat_<int8_t> test = (cv::Mat_<int8_t>(5, 5) <<	0, 0, 10, 10, 10,
 													0, 0, 10, 10, 10,
@@ -39,19 +39,19 @@ TEST(Sobel, MonoThreaded) {
 	cv::Mat_<int8_t> zeroRow = (cv::Mat_<int8_t>(1,7) << 0, 0, 0, 0, 0, 0, 0);
 	cv::Mat_<int8_t> zeroCol = (cv::Mat_<int8_t>(5,1) << 0, 0, 0, 0, 0);
 
-	cv::Mat_<cv::Vec3b> testIMG(5, 5);
+	cv::Mat_<cv::Vec4b> testIMG(5, 5);
 
 	for(int row = 0; row < 5; ++row)
 	{
 		for(int col = 0; col < 5; ++col)
 		{
-			testIMG.at<cv::Vec3b>(row, col)[0] = test(row, col);
-			testIMG.at<cv::Vec3b>(row, col)[1] = test(row, col);
-			testIMG.at<cv::Vec3b>(row, col)[2] = test(row, col);
+			testIMG.at<cv::Vec4b>(row, col)[0] = test(row, col);
+			testIMG.at<cv::Vec4b>(row, col)[1] = test(row, col);
+			testIMG.at<cv::Vec4b>(row, col)[2] = test(row, col);
 		}
 	}
 
-	cv::Mat_<cv::Vec3b> myResult = sobel(testIMG);
+	cv::Mat_<cv::Vec4b> myResult = sobel(testIMG);
 
 	EXPECT_TRUE(assert_mat_equal(myResult, expectedResult));
 }

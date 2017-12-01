@@ -15,9 +15,9 @@ double edge_ratio(cv::Mat_<uint8_t> const& dilated_frame,
 	            0,
 	            std::plus<>(),
 	            [&edges_in_frame](uint8_t frame_pixel, uint8_t next_frame_pixel) {
-		            if(frame_pixel != 0) {
+		            if(next_frame_pixel != 0) {
 			            ++edges_in_frame;
-			            if(next_frame_pixel != 0) {
+			            if(frame_pixel != 0) {
 				            return 1;
 			            }
 		            }
@@ -41,9 +41,9 @@ double edge_ratio_omp(cv::Mat_<uint8_t> const& dilated_frame,
 		// size_t x = i / dilated_frame.cols, y = i % dilated_frame.cols;
 		// size_t x = i % dilated_frame.rows, y = i / dilated_frame.rows;
 
-		if(dilated_frame(i) != 0) {
+		if(threshed_next_frame(i) != 0) {
 			++edges_in_frame;
-			if(threshed_next_frame(i) != 0) {
+			if(dilated_frame(i) != 0) {
 				++similar_edges_count;
 			}
 		}
