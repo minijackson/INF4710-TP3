@@ -29,14 +29,14 @@ namespace {
 	}
 }
 
-cv::Mat_<uint8_t> threshold(cv::Mat_<cv::Vec3b> const& input,
+cv::Mat_<uint8_t> threshold(cv::Mat_<cv::Vec4b> const& input,
                             uint8_t limit,
                             LightnessComponent component) {
 	cv::Mat_<uint8_t> output;
 	output.create(input.rows, input.cols);
 
 	std::transform(
-	        input.begin(), input.end(), output.begin(), [limit, component](cv::Vec3b values) {
+	        input.begin(), input.end(), output.begin(), [limit, component](cv::Vec4b values) {
 		        uint8_t lightness_component =
 		                getComponent(component, values[0], values[1], values[2]);
 		        if(lightness_component > limit) {
@@ -49,14 +49,14 @@ cv::Mat_<uint8_t> threshold(cv::Mat_<cv::Vec3b> const& input,
 	return output;
 }
 
-cv::Mat_<uint8_t> threshold_gnupar(cv::Mat_<cv::Vec3b> const& input,
+cv::Mat_<uint8_t> threshold_gnupar(cv::Mat_<cv::Vec4b> const& input,
                                    uint8_t limit,
                                    LightnessComponent component) {
 	cv::Mat_<uint8_t> output;
 	output.create(input.rows, input.cols);
 
 	__gnu_parallel::transform(
-	        input.begin(), input.end(), output.begin(), [limit, component](cv::Vec3b values) {
+	        input.begin(), input.end(), output.begin(), [limit, component](cv::Vec4b values) {
 		        uint8_t lightness_component =
 		                getComponent(component, values[0], values[1], values[2]);
 		        if(lightness_component > limit) {
@@ -145,23 +145,23 @@ CLMat<uint8_t> threshold_cl(cv::Mat_<cv::Vec4b> const& input, uint8_t limit) {
 	return CLMat<uint8_t>(input.rows, input.cols, output_buffer);
 }
 
-cv::Mat_<uint8_t> threshold_cv(cv::Mat_<cv::Vec3b> const& input, uint8_t limit) {
+cv::Mat_<uint8_t> threshold_cv(cv::Mat_<cv::Vec4b> const& input, uint8_t limit) {
 	cv::Mat_<uint8_t> output;
 	output.create(input.rows, input.cols);
 
-	cv::cvtColor(input, output, CV_BGR2GRAY);
+	cv::cvtColor(input, output, CV_BGRA2GRAY);
 	cv::threshold(output, output, limit, 255, 0);
 
 	return output;
 }
 
-cv::Mat_<uint8_t> threshold_cvcl(cv::Mat_<cv::Vec3b> const& input, uint8_t limit) {
+cv::Mat_<uint8_t> threshold_cvcl(cv::Mat_<cv::Vec4b> const& input, uint8_t limit) {
 	cv::ocl::setUseOpenCL(true);
 
 	cv::Mat_<uint8_t> output;
 	output.create(input.rows, input.cols);
 
-	cv::cvtColor(input, output, CV_BGR2GRAY);
+	cv::cvtColor(input, output, CV_BGRA2GRAY);
 	cv::threshold(output, output, limit, 255, 0);
 
 	cv::ocl::setUseOpenCL(false);

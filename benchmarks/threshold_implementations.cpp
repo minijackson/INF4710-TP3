@@ -6,12 +6,12 @@
 
 #define THRESHOLD_MONOTHREADED_BENCH(fixture)                                                      \
 	BENCHMARK_F(fixture, mono_threaded, 10, 100) {                                                 \
-		threshold(image, 127, intensity);                                                          \
+		threshold(image4, 127, intensity);                                                         \
 	}
 
 #define THRESHOLD_GNU_PARALLEL_BENCH(fixture)                                                      \
 	BENCHMARK_F(fixture, gnu_parallel, 10, 100) {                                                  \
-		threshold_gnupar(image, 127, intensity);                                                   \
+		threshold_gnupar(image4, 127, intensity);                                                  \
 	}
 
 #define THRESHOLD_OPENCL_BENCH(fixture)                                                            \
@@ -21,7 +21,7 @@
 
 #define THRESHOLD_OPENCV_BENCH(fixture)                                                            \
 	BENCHMARK_F(fixture, opencv, 10, 100) {                                                        \
-		threshold_cv(image, 127);                                                                  \
+		threshold_cv(image4, 127);                                                                 \
 	}
 
 #define THRESHOLD_ALL_IMPLEMENTATIONS_BENCHMARKS(fixture)                                          \
