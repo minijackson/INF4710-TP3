@@ -13,6 +13,9 @@ class CLMat {
 	cl::Image2D buffer;
 
 public:
+	CLMat()
+	      : mat(nullptr) {}
+
 	CLMat(size_t rows,
 	      size_t cols,
 	      cl::Image2D buffer,
@@ -39,9 +42,10 @@ public:
 	}
 
 	CLMat(CLMat const& other) = delete;
-	CLMat(CLMat&& other)
-	      : buffer(std::move(other.buffer))
-	      , mat(other.mat) {
+	CLMat(CLMat&& other) {
+		destroyMyself();
+		buffer    = std::move(other.buffer);
+		mat       = other.mat;
 		other.mat = nullptr;
 	}
 
@@ -58,9 +62,7 @@ public:
 	}
 
 	~CLMat() {
-		// if(mat != nullptr) {
 		destroyMyself();
-		//}
 	}
 
 	cv::Mat_<Element>& get() {
@@ -73,7 +75,9 @@ public:
 
 private:
 	void destroyMyself() {
-		cl_singletons::queue.enqueueUnmapMemObject(buffer, mat->data);
-		delete mat;
+		if(mat != nullptr) {
+			cl_singletons::queue.enqueueUnmapMemObject(buffer, mat->data);
+			delete mat;
+		}
 	}
 };
